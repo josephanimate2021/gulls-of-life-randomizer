@@ -27,7 +27,7 @@
             </div>
         </nav>
 
-        <header id="rom_selection_screen">
+        <header>
             <span class="cloud c1"></span><span class="cloud c2"></span><span class="cloud c3"></span>
             <div class="gull" aria-hidden="true">
                 <svg viewBox="0 0 16 10" shape-rendering="crispEdges">
@@ -48,31 +48,36 @@
             <div class="wrap">
                 <div class="kicker">The Legend of Zelda</div>
                 <h1>Gulls of Life<em data-en="Randomizer">Générateur Aléatoire</em></h1>
-                <p class="ballad" data-en="A fan-made project that takes all of the locations of the Gulls of Life romhack and shuffles around, creating an entirely new experience each time!">
+                <p class="ballad" data-en="A fan-made project that takes all of the locations of the Gulls of Life romhack and shuffles them around, creating an entirely new experience each time!">
                     Un projet créé par des fans qui reprend tous les lieux du romhack « Gulls of Life » et les mélange, offrant ainsi une expérience totalement nouvelle à chaque fois !
                 </p>
-                <div class="hearts" aria-hidden="true"><span>♥</span><span>♥</span><span>♥</span></div>
-                <ul class="tags">
-                    <li data-en="★ Original game features">★ Fonctionnalités du jeu original</li>
-                    <li data-en="◆ New experience each seed">◆ Une nouvelle expérience à chaque graine</li>
-                </ul>
-                <figure class="gbc hero">
-                    <div class="screen"><img src="docs/shots/v10_1.png"
-                            alt="Écran titre de The Legend of Zelda: Gulls of Life, une mouette posée sur le logo"
-                            data-en-alt="The Legend of Zelda: Gulls of Life Randomizer title screen, a seagull perched on the logo"
-                            style="cursor:zoom-in"></div>
-                    <figcaption><span class="led"></span><span data-en="Title screen">Écran titre</span></figcaption>
-                </figure>
-                <div class="say" id="hello"><span class="who" data-en="So, what are you waiting for?">Alors, qu'est-ce que tu attends ?</span><br><span id="helloText"></span></div>
-                <a class="play" href="javascript:romFileSelect();"
-                    data-en="▶ Get Started">▶ Jouer
-                    à la
-                    démo<small id="rando_version">v0.0.0</small></a>
+                <div id="rom_selection_screen">
+                    <div class="hearts" aria-hidden="true" id="rom_status_text"></div>
+                    <ul class="tags">
+                        <li data-en="★ Original game features">★ Fonctionnalités du jeu original</li>
+                        <li data-en="◆ New experience each seed">◆ Une nouvelle expérience à chaque graine</li>
+                    </ul>
+                    <figure class="gbc hero">
+                        <div class="screen"><img src="docs/shots/v10_1.png"
+                                alt="Écran titre de The Legend of Zelda: Gulls of Life, une mouette posée sur le logo"
+                                data-en-alt="The Legend of Zelda: Gulls of Life Randomizer title screen, a seagull perched on the logo"
+                                style="cursor:zoom-in"></div>
+                        <figcaption><span class="led"></span><span data-en="Title screen">Écran titre</span></figcaption>
+                    </figure>
+                    <div class="say" id="hello"><span class="who" data-en="So, what are you waiting for?">Alors, qu'est-ce que tu attends ?</span><br><span id="helloText"></span></div>
+                    <a class="play" href="javascript:;" onclick="rando.romFileSelect(this)"
+                        data-en="▶ Upload Oracle of Ages (US) ROM">
+                        ▶ Téléverser la ROM d'Oracle of Ages (version américaine)<small id="rando_version">v0.0.0</small>
+                    </a>
+                </div>
+                <div id="rando_settings">
+                    
+                </div>
             </div>
             <div class="sun" aria-hidden="true"></div>
         </header>
     </div>
-    <main>
+    <main style="display: none">
 
         <section id="histoire">
             <div class="wrap two">
@@ -555,15 +560,8 @@
     <footer>
         <div class="wrap">
             <p
-                data-en="Engine and disassembly: &lt;a href=&quot;https://github.com/Stewmath/oracles-disasm&quot;&gt;oracles-disasm&lt;/a&gt; by Stewmath and its contributors. Marin's sprites: oracles-disasm's &lt;code&gt;sprites/marin&lt;/code&gt; branch.">
-                Moteur et désassemblage : <a href="https://github.com/Stewmath/oracles-disasm">oracles-disasm</a> de
-                Stewmath et
-                ses contributeurs. Sprites de Marine : branche <code>sprites/marin</code> d'oracles-disasm.</p>
-            <p
-                data-en="&lt;i&gt;The Legend of Zelda&lt;/i&gt; belongs to Nintendo; this is a fan-made hack, with no ROM. By &lt;a href=&quot;https://github.com/soaresden&quot;&gt;soaresden&lt;/a&gt;.">
-                <i>The Legend of Zelda</i> appartient à Nintendo ; ce projet est un hack fait par des fans, sans ROM.
-                Par <a href="https://github.com/soaresden">soaresden</a>.
-            </p>
+                data-en="Gulls of life romhack made by &lt;a href=&quot;https://github.com/soaresden/ZeldaGullsOfLife&quot;&gt;soaresden&lt;/a&gt; and &lt;a href=&quot;https://claude.ai&quot;&gt;claude&lt;/a&gt;">
+                Gulls of Life romhack réalisé par <a href="https://github.com/soaresden/ZeldaGullsOfLife">soaresden</a> et <a href="https://claude.ai">claude</a>.</p>
         </div>
     </footer>
 

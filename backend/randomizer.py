@@ -5,7 +5,7 @@ import hashlib
 
 class Randomizer():
     def __init__(self):
-        self.rom = bytes(open("ages.gbc", "b").read())
+        self.rom = bytes(open("ages.gbc", "rb").read())
 
     def generate_seed(self, arr):
         if not self.seed:

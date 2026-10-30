@@ -1,4 +1,3 @@
-
 from .constants import *
 
 locations_data = { # More locations will be filled once a release comes out where D2 can be completable.
