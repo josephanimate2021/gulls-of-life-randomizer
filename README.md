@@ -6,7 +6,7 @@ Gulls of Life is a romhack based on Oracle of Ages which is a sequel to Link’s
 ## Where it all started
 Marin wishes that she could come back as a seagull and as a result her wish comes true and ends up coming back as a seagull after all, on a side where no one dreams anymore.
 
-## Where you would normally start in the game:
+## Where you would normally start in the game
 You would start in the remains of Koholint Island where you are greeted by Marin as a seagull (the randomizer will skip this sequence, along with the cutscenes).
 
 ## The Goal
