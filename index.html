@@ -27,7 +27,7 @@
             </div>
         </nav>
 
-        <header>
+        <header id="prerando">
             <span class="cloud c1"></span><span class="cloud c2"></span><span class="cloud c3"></span>
             <div class="gull" aria-hidden="true">
                 <svg viewBox="0 0 16 10" shape-rendering="crispEdges">
@@ -70,287 +70,48 @@
                         ▶ Téléverser la ROM d'Oracle of Ages (version américaine)<small id="rando_version">v0.0.0</small>
                     </a>
                 </div>
-                <div id="rando_settings">
-                    
+                <div id="rando_settings_change_screen" style="display: none">
+                    <div class="hearts" aria-hidden="true" id="rando_status_text"></div>
+                    <label for="rando_seed" data-en="Seed:">Graine:</label> <input type="text" id="rando_seed" oninput="rando.changeSettingsFromSeed()" style="width: 50%">
+                    <a onclick="navigator.clipboard.readText().then(t => {
+                        const element = document.getElementById('rando_seed')
+                        element.value = t
+                        element.dispatchEvent(new Event('input', { bubbles: true }));
+                    })" href="javascript:;" title="Paste Seed">📋</a>
+                    <a onclick="navigator.clipboard.writeText(document.getElementById('rando_seed').value).then(() => {
+                        alert(SBT('Graine copiée', 'Copied Seed'))
+                    }).catch(e => {
+                        console.error('Seed Copy Failed', e)
+                        alert(SBT('Échec de la copie de la graine', 'Failed to copy seed'))
+                    })" href="javascript:;" title="Copy Seed">📰</a>
+                    <br>
+                    <div id="rando_settings">
+                        <input type="checkbox" id="shuffle_dungeons" onclick="rando.changeSettingsSeed()"><label for="shuffle_dungeons" data-en="Shuffle dungeons">Mélanger les donjons</label>
+                        <input type="checkbox" id="shuffle_items" onclick="rando.changeSettingsSeed()" checked><label for="shuffle_items" data-en="Shuffle items">Mélanger les objets</label>
+                        <input type="checkbox" id="keysanity" disabled  onclick="rando.changeSettingsSeed()"><label for="keysanity" data-en="Key Sanity">La clé de la santé mentale</label>
+                        <input type="checkbox" id="shuffle_bosses" disabled  onclick="rando.changeSettingsSeed()"><label for="shuffle_bosses" data-en="Shuffle bosses">Mélanger les boss</label>
+                        <input type="checkbox" id="shuffle_all"  onclick="rando.changeSettingsSeed()"><label for="shuffle_all" data-en="Shuffle everything">Tout mélanger</label>
+                        <br>
+                        <label for="romhack_version" data-en="Romhack Version:">Version Romhack:</label> <select id="romhack_version"  onchange="rando.changeSettingsSeed()">
+                            <option value="dev" data-en="Dev Build">Version de développement</option>
+                            <option value="latest" selected data-en="v1.0/1.1 (Latest, stable)">v1.0/1.1 (Dernière version, stable)</option>
+                        </select>
+                    </div>
+                    <a class="play" href="javascript:;" onclick="rando.generateSeed(this)"
+                        data-en="▶ Generate Randomized ROM">▶ Générer la ROM aléatoire</a>
                 </div>
             </div>
             <div class="sun" aria-hidden="true"></div>
         </header>
     </div>
-    <main style="display: none">
-
-        <section id="histoire">
-            <div class="wrap two">
-                <div>
-                    <h2><small data-en="The story">L'histoire</small><span
-                            data-en="Koholint is gone… not quite">Cocolint a
-                            disparu… pas tout à fait</span></h2>
-                    <p
-                        data-en="The Wind Fish woke up. Marin made a wish: to have wings and fly beyond the sea. She comes back as a &lt;b&gt;seagull&lt;/b&gt;, at Link's side, on an archipelago where nobody dreams anymore.">
-                        Le Poisson-Rêve s'est réveillé. Marine avait fait un vœu : avoir des ailes pour partir au-delà
-                        de la mer.
-                        Elle revient en <b>mouette</b>, auprès de Link, dans un archipel où plus personne ne rêve.</p>
-                    <p data-en="Why did the dreams go out? And what is left of Koholint… when you close your eyes?">
-                        Pourquoi les
-                        rêves se sont-ils éteints ? Et que reste-t-il de Cocolint… quand on ferme les yeux ?</p>
-                    <p
-                        data-en="&lt;i&gt;Gulls of Life&lt;/i&gt;: &lt;i&gt;gulls&lt;/i&gt; sounds like &lt;i&gt;goals&lt;/i&gt;. You make your dreams come true instead of staying in them.">
-                        <i>Gulls of Life</i> : <i>gulls</i> (les mouettes) sonne comme <i>goals</i> (les buts). On
-                        réalise ses
-                        rêves, on n'y reste pas.
-                    </p>
-                </div>
-                <figure class="gbc" id="film">
-                    <div class="screen">
-                        <img src="docs/shots/film1.png" alt="Un visage dans les nuages"
-                            data-en-alt="A face in the clouds">
-                        <img src="docs/shots/film2.png" alt="Une mouette" data-en-alt="A seagull" style="opacity:0">
-                        <img src="docs/shots/film3.png" alt="Sur le rondin" data-en-alt="On the log" style="opacity:0">
-                        <img src="docs/shots/film4.png" alt="Deux cœurs" data-en-alt="Two hearts" style="opacity:0">
-                    </div>
-                    <figcaption><span class="led"></span><span data-en="Opening film">Film d'ouverture</span><span
-                            class="dots" id="filmDots"></span></figcaption>
-                </figure>
-            </div>
-        </section>
-
-        <section id="promesses">
-            <div class="wrap">
-                <h2><small data-en="The promise">La promesse</small><span data-en="What awaits you">Ce qui vous
-                        attend</span>
-                </h2>
-                <p class="intro"
-                    data-en="A real Zelda, made for the Game Boy Color: new islands, new dungeons, new music. And a seagull who has plenty to say.">
-                    Un vrai Zelda, fait pour la Game Boy Color : de nouvelles îles, de nouveaux donjons, de nouvelles
-                    musiques. Et
-                    une mouette qui a son mot à dire.</p>
-                <div class="feats">
-                    <div class="card feat"><span class="ico" aria-hidden="true">♪</span>
-                        <h3 data-en="Original music">Des musiques originales</h3>
-                        <p
-                            data-en="Composed for the game, note by note: a tender ballad on the title screen, the air of the islands, the warmth of the inn, the wind around the lighthouse…">
-                            Composées pour le jeu, note à note : une ballade tendre à l'écran titre, l'air des îles, la
-                            chaleur de
-                            l'auberge, le vent autour du phare…</p>
-                    </div>
-                    <div class="card feat"><span class="ico" aria-hidden="true">★</span>
-                        <h3 data-en="Epic music">Une musique épique</h3>
-                        <p
-                            data-en="When the fight starts, the orchestra goes all in. Themes in the spirit of the great orchestral scores, squeezed into four Game Boy channels.">
-                            Quand le combat commence, l'orchestre se déchaîne. Des thèmes dans l'esprit des grandes
-                            orchestrations,
-                            tenus dans les quatre voix de la Game Boy.</p>
-                    </div>
-                    <div class="card feat"><span class="ico" aria-hidden="true">♫</span>
-                        <h3 data-en="A brand-new theme">Un nouveau thème</h3>
-                        <p
-                            data-en="&lt;i&gt;The Ballad of the Seagull&lt;/i&gt;, the game's own theme. Gentle, then fierce: you will hear it in many forms.">
-                            La <i>Ballade de la Mouette</i>, le thème du jeu. Douce, puis furieuse : vous l'entendrez
-                            sous bien des
-                            formes.</p>
-                    </div>
-                    <div class="card feat"><span class="ico" aria-hidden="true">☾</span>
-                        <h3 data-en="New mechanics">De nouvelles mécaniques</h3>
-                        <p
-                            data-en="Dreaming and waking don't play by the same rules. Learn both… and use them against each other.">
-                            Le rêve et l'éveil ne jouent pas selon les mêmes règles. Apprenez les deux… et servez-vous
-                            de l'un contre
-                            l'autre.</p>
-                    </div>
-                    <div class="card feat"><span class="ico" aria-hidden="true">◆</span>
-                        <h3 data-en="New minigames">De nouveaux mini-jeux</h3>
-                        <p
-                            data-en="Because an island without games isn't a Zelda island: the showman's two minesweepers, a Pac-Man-style maze with Lynels on your heels, free diving, hide-and-seek, spinning-top shooting, the brass band's dance, singing… and a Metal Gear-style infiltration sequence.">
-                            Parce qu'une île sans jeux, ce n'est pas une île de Zelda : les deux démineurs du forain, un
-                            labyrinthe à
-                            la Pac-Man avec des Lynels aux trousses, la plongée en apnée, le cache-cache, le tir aux
-                            toupies, la danse
-                            de la fanfare, le chant… et une séquence d'infiltration façon Metal Gear.</p>
-                    </div>
-                    <div class="card feat"><span class="ico" aria-hidden="true">⚔</span>
-                        <h3 data-en="Real dungeons">De vrais temples</h3>
-                        <p
-                            data-en="One key item, puzzles that use it, and bosses with a lot to say. Short, dense, made to be cleared in one go.">
-                            Un objet clé, des énigmes taillées pour lui, et des boss qui ont la langue bien pendue.
-                            Courts, denses, à
-                            finir d'une traite.</p>
-                    </div>
-                    <div class="card feat"><span class="ico" aria-hidden="true">?</span>
-                        <h3 data-en="A twist">Un rebondissement</h3>
-                        <p data-en="We won't say a word. You'll see.">On ne vous dira rien. Vous verrez.</p>
-                    </div>
-                    <div class="card feat"><span class="ico" aria-hidden="true">+</span>
-                        <h3>New Game+</h3>
-                        <p data-en="Finished the game? Set sail again, with what you've earned.">Le jeu fini ? On
-                            repart, avec ce
-                            qu'on a gagné.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="images">
-            <div class="wrap">
-                <h2><small data-en="A glimpse">Aperçu</small><span data-en="Somewhere beyond the sea">Quelque part
-                        au-delà de la
-                        mer</span></h2>
-                <p class="intro"
-                    data-en="A taste of what's waiting out there. No more than that: the rest is for you to find.">
-                    Un avant-goût de ce qui vous attend. Pas plus : le reste, c'est à vous de le découvrir.</p>
-                <h3 class="shots-title" data-en="Bosses with a lot to say">Des boss qui ont la langue bien pendue</h3>
-                <div class="shots">
-                    <figure><img src="docs/shots/teaser/boss_pantin.png"
-                            alt="Marine lance une bombe sur le Pantin-Sans-Fil"
-                            data-en-alt="Marin throws a bomb at the Stringless Puppet" loading="lazy">
-                        <figcaption data-en="Marin doesn't just talk…">Marine ne fait pas que parler…</figcaption>
-                    </figure>
-                    <figure><img src="docs/shots/teaser/boss_soldat.png"
-                            alt="Le Soldat de Plomb : Garde à vous ! Épée de plomb,"
-                            data-en-alt="The Lead Soldier: Attention! Lead sword," loading="lazy">
-                        <figcaption data-en="Attention!">Garde à vous !</figcaption>
-                    </figure>
-                    <figure><img src="docs/shots/teaser/boss_copiator.png"
-                            alt="Copiator : Montre-moi. Tout ce que tu fais,"
-                            data-en-alt="Copiator: Show me. Everything you do," loading="lazy">
-                        <figcaption data-en="He copies everything you do.">Il copie tout ce que tu fais.</figcaption>
-                    </figure>
-                    <figure><img src="docs/shots/teaser/boss_gardien.png" alt="Le Gardien des Cloches et sa faux"
-                            data-en-alt="The Bell Keeper and his scythe" loading="lazy">
-                        <figcaption data-en="For whom do the bells toll?">Les cloches sonnent pour qui ?</figcaption>
-                    </figure>
-                    <figure><img src="docs/shots/teaser/boss_givrolin.png" alt="Givrolin : Laissez-les"
-                            data-en-alt="Givrolin: Leave them" loading="lazy">
-                        <figcaption data-en="An ice palace, and its master.">Un palais de glace, et son maître.
-                        </figcaption>
-                    </figure>
-                    <figure><img src="docs/shots/teaser/boss_terrier.png" alt="Un boss au fond d'un terrier"
-                            data-en-alt="A boss at the bottom of a burrow" loading="lazy">
-                        <figcaption data-en="At the bottom of the burrow, something waits.">Au fond du terrier, quelque
-                            chose
-                            attend.</figcaption>
-                    </figure>
-                    <figure><img src="docs/shots/teaser/boss_chevalier.png" alt="Le Chevalier Gelé"
-                            data-en-alt="The Frozen Knight" loading="lazy">
-                        <figcaption data-en="A knight frozen in ice.">Un chevalier figé dans la glace.</figcaption>
-                    </figure>
-                    <figure><img src="docs/shots/teaser/objet_grappin.png" alt="Le Grappin-Écho !"
-                            data-en-alt="The Echo Hookshot!" loading="lazy">
-                        <figcaption data-en="Every dungeon, its item.">Chaque donjon, son objet.</figcaption>
-                    </figure>
-                </div>
-                <h3 class="shots-title" data-en="Minigames, and a few surprises">Des mini-jeux, et quelques surprises
-                </h3>
-                <div class="shots">
-                    <figure><img src="docs/shots/teaser/mini_boite.png"
-                            alt="Link caché dans une boîte en carton, un garde passe, le radar en haut"
-                            data-en-alt="Link hidden in a cardboard box, a guard walks by, the radar in the corner"
-                            loading="lazy">
-                        <figcaption data-en="A cardboard box, a guard, a radar… ring a bell?">Un carton, un garde, un
-                            radar… ça vous
-                            rappelle quelque chose ?</figcaption>
-                    </figure>
-                    <figure><img src="docs/shots/teaser/mini_alerte.png" alt="Le garde a un doute : « ? »"
-                            data-en-alt="The guard has a doubt: '?'" loading="lazy">
-                        <figcaption data-en="'?'… Don't move.">« ? »… Ne bouge plus.</figcaption>
-                    </figure>
-                    <figure><img src="docs/shots/teaser/mini_lynels.png"
-                            alt="Un labyrinthe à rubis, des Lynels aux trousses"
-                            data-en-alt="A rupee maze, Lynels on your heels" loading="lazy">
-                        <figcaption data-en="Eat the rupees. Run from the Lynels.">Mange les rubis. Fuis les Lynels.
-                        </figcaption>
-                    </figure>
-                    <figure><img src="docs/shots/teaser/mini_mamono.png"
-                            alt="Le démineur du forain : des chiffres et un monstre"
-                            data-en-alt="The showman's minesweeper: numbers and a monster" loading="lazy">
-                        <figcaption data-en="Numbers don't lie… monsters do.">Les chiffres ne mentent pas… les monstres,
-                            si.
-                        </figcaption>
-                    </figure>
-                    <figure><img src="docs/shots/teaser/mini_plongee.png" alt="Link plonge en apnée vers un trésor"
-                            data-en-alt="Link free-dives towards a treasure" loading="lazy">
-                        <figcaption data-en="Hold your breath.">Retiens ton souffle.</figcaption>
-                    </figure>
-                </div>
-                <h3 class="shots-title" data-en="Chapter 1, the playable demo">Le chapitre 1, la démo jouable</h3>
-                <div class="shots">
-                    <figure><img src="docs/shots/chapitre11.png" alt="Une plage, au petit matin"
-                            data-en-alt="A beach, at dawn" loading="lazy">
-                        <figcaption data-en="A beach, at dawn.">Une plage, au petit matin.</figcaption>
-                    </figure>
-                    <figure><img src="docs/shots/chapitre12.png" alt="Quelqu'un arrive en volant"
-                            data-en-alt="Someone comes flying in" loading="lazy">
-                        <figcaption data-en="Someone comes flying in…">Quelqu'un arrive en volant…</figcaption>
-                    </figure>
-                    <figure><img src="docs/shots/v02_3.png" alt="L'auberge de Port-Veille"
-                            data-en-alt="The Port-Veille inn" loading="lazy">
-                        <figcaption data-en="Port-Veille, where nobody sleeps anymore.">Port-Veille, où l'on ne dort
-                            plus.
-                        </figcaption>
-                    </figure>
-                    <figure><img src="docs/shots/auberge5.png" alt="Un pont cassé" data-en-alt="A broken bridge"
-                            loading="lazy">
-                        <figcaption data-en="Some paths are cut off…">Certains chemins sont coupés…</figcaption>
-                    </figure>
-                    <figure><img src="docs/shots/v03_2.png"
-                            alt="Le village, tout bleu, une petite lune en haut de l'écran"
-                            data-en-alt="The village, all blue, a little moon at the top of the screen" loading="lazy">
-                        <figcaption data-en="What if you closed your eyes? Not for too long…">Et si l'on fermait les
-                            yeux ? Pas trop
-                            longtemps…</figcaption>
-                    </figure>
-                    <figure><img src="docs/shots/v03_3.png" alt="Niveau 1 : Phare Éteint"
-                            data-en-alt="Level 1: Dark Lighthouse" loading="lazy">
-                        <figcaption data-en="A lighthouse gone dark.">Un phare qui s'est éteint.</figcaption>
-                    </figure>
-                    <figure><img src="docs/shots/v10_2.png" alt="Une salle du phare, des torches allumées"
-                            data-en-alt="A lighthouse room, its torches lit" loading="lazy">
-                        <figcaption data-en="It's dark in there… bring a light.">Il fait noir là-dedans… prends de quoi
-                            t'éclairer.
-                        </figcaption>
-                    </figure>
-                    <figure><img src="docs/shots/v03_4.png" alt="Un passage au milieu de l'eau"
-                            data-en-alt="A path through the water" loading="lazy">
-                        <figcaption data-en="In a dream, anything is possible…">Dans un rêve, tout est possible…
-                        </figcaption>
-                    </figure>
-                    <figure><img src="docs/shots/v11_1.png" alt="Une statue à pousser sur un bouton"
-                            data-en-alt="A statue to push onto a switch" loading="lazy">
-                        <figcaption data-en="Push, think, push again.">Pousser, réfléchir, pousser encore.</figcaption>
-                    </figure>
-                    <figure><img src="docs/shots/v11_2.png" alt="Un pont au-dessus d'une douve"
-                            data-en-alt="A bridge over a moat" loading="lazy">
-                        <figcaption data-en="A bridge that wasn't there before…">Un pont qui n'était pas là…
-                        </figcaption>
-                    </figure>
-                    <figure><img src="docs/shots/v11_3.png" alt="La boutique : une fée en bouteille et des cœurs"
-                            data-en-alt="The shop: a fairy in a bottle and hearts" loading="lazy">
-                        <figcaption data-en="Something to get you back on your feet.">De quoi se relever.</figcaption>
-                    </figure>
-                    <figure><img src="docs/shots/v11_4.png" alt="Des rubis de couleur dans le sable"
-                            data-en-alt="Coloured rupees in the sand" loading="lazy">
-                        <figcaption data-en="Dig… but not just anywhere.">Creuser… mais pas n'importe où.</figcaption>
-                    </figure>
-                </div>
-            </div>
-        </section>
-
-        <section id="archipel">
-            <div class="wrap">
-                <h2><small data-en="The world">Le monde</small><span data-en="The Sleepless Archipelago">L'archipel des
-                        Sans-Sommeil</span></h2>
-                <p class="intro" data-en="Eight islands, and a log for a boat. It all starts on Mist Island.">Huit îles,
-                    et un
-                    rondin pour bateau. Tout commence sur l'île de la Brume.</p>
-                <div class="map"><img src="docs/carte_archipel.png" alt="Carte de l'archipel des Sans-Sommeil"
-                        data-en-alt="Map of the Sleepless Archipelago" loading="lazy"></div>
-            </div>
-        </section>
+    <main id="postrando" style="display: none">
 
         <section id="jouer">
             <div class="wrap two" style="align-items:start">
                 <div>
-                    <h2><small data-en="Demo v1.0/1.1">Démo v1.0/1.1</small><span data-en="Play the demo">Jouer à la
-                            démo</span>
+                    <h2><small data-en="&lt;a href=&quot;javascript:;&quot; onclick=&quot;rando.switchBackToGenScreen()&quot;&gt;Back To Generation Screen&lt;/a&gt;">
+                        <a href="javascript:;" onclick="rando.switchBackToGenScreen()">Retour à l'écran « Génération »</a>
+                    </small><span data-en="Congratulations! your game has successfully been randomized!">Félicitations! La génération aléatoire de votre jeu s'est déroulée avec succès!</span>
                     </h2>
                     <p
                         data-en="The whole first chapter. It's a &lt;b&gt;patch&lt;/b&gt; to apply to your own &lt;i&gt;Oracle of Ages&lt;/i&gt; (USA) ROM: no ROM is provided.">
@@ -428,56 +189,6 @@
                                 donjon), mise à jour</li>
                         </ul>
                     </details>
-                </div>
-            </div>
-        </section>
-
-        <section id="journal">
-            <div class="wrap">
-                <h2><small data-en="Quest log">Journal de quête</small><span data-en="Where we are">Où on en est</span>
-                </h2>
-                <p class="intro"
-                    data-en="All eight islands are done. Now come the finishing touches: bug fixes, balancing, touch-ups to dungeons and dialogue, and collectibles. The public demo is still chapter 1.">
-                    Les huit îles sont finies. Place aux finitions : corrections, équilibrage, retouches des donjons et
-                    des
-                    dialogues, et objets à collectionner. La démo publique reste le chapitre 1.</p>
-                <div class="card">
-                    <p class="tally" id="tally"></p>
-                    <ul class="quest" id="quest">
-                        <li data-en="The opening film">Le film d'ouverture</li>
-                        <li data-en="Chapter 1: Mist Island">Chapitre 1 : l'île de la Brume</li>
-                        <li data-en="The first dungeon: a real temple, its key item and its boss">Le premier donjon : un
-                            vrai
-                            temple, son objet et son boss</li>
-                        <li><span data-en="The &lt;i&gt;Gulls of Life&lt;/i&gt; title screen">L'écran titre <i>Gulls of
-                                    Life</i></span></li>
-                        <li data-en="English and French, menus included">Français et anglais, menus compris</li>
-                        <li data-en="Playable demo v1.0/1.1">Démo jouable v1.0/1.1</li>
-                        <li data-en="All eight islands of the archipelago, their dungeons and their bosses">Les huit
-                            îles de
-                            l'archipel, leurs donjons et leurs boss</li>
-                        <li
-                            data-en="Original music: title screen, Mist Island, the inn, the lighthouse, miniboss and boss">
-                            Des
-                            musiques originales : écran titre, île de la Brume, auberge, phare, miniboss et boss</li>
-                        <li data-en="A first minigame: the fairground man's Rupee Dig">Un premier mini-jeu : le
-                            Creuse-Rubis du
-                            forain</li>
-                        <li data-en="The other minigames, and a Metal Gear-style infiltration sequence">Les autres
-                            mini-jeux, et une
-                            séquence d'infiltration façon Metal Gear</li>
-                        <li class="todo" data-en="Collectibles: secrets and heart pieces">Les objets à collectionner :
-                            secrets et
-                            quarts de cœur</li>
-                        <li data-en="The music of the other islands">Les musiques des autres îles</li>
-                        <li data-en="The rest of the story, up to the end… and a twist">La suite de l'histoire, jusqu'à
-                            la fin… et
-                            un rebondissement</li>
-                        <li class="todo" data-en="Bug fixes and balancing">Corrections et équilibrage</li>
-                        <li class="todo" data-en="Touch-ups to dungeons and dialogue">Retouches des donjons et des
-                            dialogues</li>
-                        <li class="todo" data-en="New Game+">New Game+</li>
-                    </ul>
                 </div>
             </div>
         </section>

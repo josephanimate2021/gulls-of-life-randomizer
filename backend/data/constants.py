@@ -7,3 +7,9 @@ TREASURE_SPAWN_DIG = 0x50
 TREASURE_SPAWN_DELAYED_CHEST = 0x60
 
 ROM_HASH = "c4639cc61c049e5a085526bb6cac03bb"
+
+DUNGEON_NAMES = [
+    "",
+    "Dark Lighthouse",
+    "Toy Chest"
+]
