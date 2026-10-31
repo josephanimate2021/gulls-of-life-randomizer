@@ -76,11 +76,62 @@ class Randomizer {
                 }
                 this.pyodide = pyodide
                 this.pyodide.FS.writeFile(`/home/pyodide/__init__.py`, "")
-                await this.pyodide.runPythonAsync('import os\nprint(__package__)')
                 this.rom_stats_elem.textContent = SBT("Vérification de la ROM...", "Validating ROM...");
                 this.pyodide.FS.writeFile("ages.gbc", new Uint8Array(arrayBuffer));
-                this.pyodide.runPythonAsync(this.pyCode + "\nrando.validate_rom()").then((isValid) => {
+                this.pyodide.runPythonAsync(this.pyCode + "\nrando.validate_rom()").then(async (isValid) => {
                     if (isValid) {
+                        this.rom_stats_elem.textContent = SBT("Chargement des paramètres du générateur aléatoire...", "Loading randomizer settings...");
+                        const code = await (await fetch("backend/rando_settings.py")).text()
+                        this.lang_index = document.getElementById('lang').textContent.endsWith("FR") ? 1 : 0;
+                        const settings = JSON.parse(await this.pyodide.runPythonAsync(code + `\nstringify_settings(${this.lang_index})`))
+                        const settings_elem = document.getElementById("rando_settings");
+                        for (const c in settings) {
+                            const center = document.createElement("center")
+                            const cat_elem = document.createElement("h2");
+                            cat_elem.textContent = c
+                            center.appendChild(cat_elem)
+                            settings_elem.appendChild(center)
+                            const br = document.createElement("br")
+                            settings_elem.appendChild(br)
+                            for (const o in settings[c]) {
+                                let input_first = false
+                                const label_elem = document.createElement("label")
+                                let input_elem = document.createElement("input")
+                                input_elem.setAttribute("onclick", "rando.changeSettingsSeed()")
+                                if (typeof settings[c][o].default == "boolean") {
+                                    input_elem.type = "checkbox"
+                                    input_first = true
+                                    input_elem.checked = settings[c][o].default
+                                } else if (settings[c][o].options) {
+                                    input_elem = document.createElement("select")
+                                    input_elem.setAttribute("onclick", "rando.changeSettingsSeed()")
+                                    for (const c2 in settings[c][o].options) {
+                                        const optgroup = document.createElement("optgroup")
+                                        optgroup.label = c2
+                                        for (const p in settings[c][o].options[c2]) {
+                                            const option_elem = document.createElement("option")
+                                            option_elem.value = p
+                                            if (settings[c][o].default == p) option_elem.selected = true
+                                            option_elem.textContent = SBT(settings[c][o].options[c2][p][1], settings[c][o].options[c2][p][0])
+                                            optgroup.appendChild(option_elem)
+                                        }
+                                        input_elem.appendChild(optgroup)
+                                    }
+                                }
+                                input_elem.id = o
+                                if (settings[c][o].disabled) input_elem.disabled = true
+                                label_elem.setAttribute("for", o)
+                                for (let i = 0; i < 2; i++) {
+                                    if (input_first) settings_elem.insertAdjacentHTML("beforeend", `${i == 1 ? ":" : ""} ${input_elem.outerHTML}`);
+                                    else label_elem.textContent = SBT(settings[c][o].fr, o.split("_").map(a => {
+                                        const rest = a.substring(1)
+                                        return a.split(rest)[0].toUpperCase() + rest
+                                    }).join(" ")), settings_elem.appendChild(label_elem)
+                                    input_first = !input_first
+                                }
+                            }
+                            settings_elem.appendChild(br)
+                        }
                         document.getElementById("rom_selection_screen").remove()
                         document.getElementById("rando_settings_change_screen").style.display = "block"
                         this.changeSettingsSeed()
@@ -98,7 +149,6 @@ class Randomizer {
         input.click();
     }
     changeSettingsSeed() {
-        const rando_seed_elem = document.getElementById("rando_seed")
         for (const elem of document.getElementById("rando_settings").children) {
             if (!elem.id) continue
             switch (elem.getAttribute("type")) {
@@ -110,7 +160,7 @@ class Randomizer {
                 }
             }
         }
-        rando_seed_elem.value = btoa(JSON.stringify(this.rando_settings))
+        document.getElementById("rando_seed").value = btoa(JSON.stringify(this.rando_settings))
     }
     changeSettingsFromSeed() {
         try {

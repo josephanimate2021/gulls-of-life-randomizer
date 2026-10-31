@@ -85,18 +85,7 @@
                         alert(SBT('Échec de la copie de la graine', 'Failed to copy seed'))
                     })" href="javascript:;" title="Copy Seed">📰</a>
                     <br>
-                    <div id="rando_settings">
-                        <input type="checkbox" id="shuffle_dungeons" onclick="rando.changeSettingsSeed()"><label for="shuffle_dungeons" data-en="Shuffle dungeons">Mélanger les donjons</label>
-                        <input type="checkbox" id="shuffle_items" onclick="rando.changeSettingsSeed()" checked><label for="shuffle_items" data-en="Shuffle items">Mélanger les objets</label>
-                        <input type="checkbox" id="keysanity" disabled  onclick="rando.changeSettingsSeed()"><label for="keysanity" data-en="Key Sanity">La clé de la santé mentale</label>
-                        <input type="checkbox" id="shuffle_bosses" disabled  onclick="rando.changeSettingsSeed()"><label for="shuffle_bosses" data-en="Shuffle bosses">Mélanger les boss</label>
-                        <input type="checkbox" id="shuffle_all"  onclick="rando.changeSettingsSeed()"><label for="shuffle_all" data-en="Shuffle everything">Tout mélanger</label>
-                        <br>
-                        <label for="romhack_version" data-en="Romhack Version:">Version Romhack:</label> <select id="romhack_version"  onchange="rando.changeSettingsSeed()">
-                            <option value="dev" data-en="Dev Build">Version de développement</option>
-                            <option value="latest" selected data-en="v1.0/1.1 (Latest, stable)">v1.0/1.1 (Dernière version, stable)</option>
-                        </select>
-                    </div>
+                    <div id="rando_settings"></div>
                     <a class="play" href="javascript:;" onclick="rando.generateSeed(this)"
                         data-en="▶ Generate Randomized ROM">▶ Générer la ROM aléatoire</a>
                 </div>
