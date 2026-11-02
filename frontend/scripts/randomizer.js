@@ -7,12 +7,11 @@ class Randomizer {
             locations: {}
         }
     }
-    romFileSelect(btn) {
+    async romFileSelect(btn) {
         if (this.loadingROM) return;
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.gbc,.zip';
-        input.title = SBT('Sélectionner un fichier ROM', 'Select a ROM file');
+        this.pyodide ||= await loadPyodide().catch(e => {
+            this.rom_stats_elem.textContent = SBT("Pyodide n'a pas pu être chargé pour une raison inconnue. Veuillez vérifier votre code.", "Pyodide could not be loaded for some reason. please check your code.");
+        });
         input.onchange = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -21,7 +20,9 @@ class Randomizer {
             const reader = new FileReader();
             reader.onload = async (event) => {
                 const arrayBuffer = event.target.result;
-                const pyodide = await loadPyodide();
+                const pyodide = await loadPyodide().catch(e => {
+                    this.rom_stats_elem.textContent = SBT("Échec du chargement de la ROM. Pyodide n'a pas pu être chargé pour une raison inconnue. Veuillez vérifier votre code.", "Loading ROM failed. Pyodide could not be loaded for some reason. please check your code.");
+                });
                 const imported_files = []
                 async function mount_import_files(code, og_file_location = "") {
                     const lines = code.split("\n")
@@ -86,13 +87,12 @@ class Randomizer {
                         const settings = JSON.parse(await this.pyodide.runPythonAsync(code + `\nstringify_settings(${this.lang_index})`))
                         const settings_elem = document.getElementById("rando_settings");
                         for (const c in settings) {
+                            settings_elem.insertAdjacentHTML("beforeend", "<br>")
                             const center = document.createElement("center")
-                            const cat_elem = document.createElement("h2");
+                            const cat_elem = document.createElement("h3");
                             cat_elem.textContent = c
                             center.appendChild(cat_elem)
                             settings_elem.appendChild(center)
-                            const br = document.createElement("br")
-                            settings_elem.appendChild(br)
                             for (const o in settings[c]) {
                                 let input_first = false
                                 const label_elem = document.createElement("label")
@@ -101,10 +101,10 @@ class Randomizer {
                                 if (typeof settings[c][o].default == "boolean") {
                                     input_elem.type = "checkbox"
                                     input_first = true
-                                    input_elem.checked = settings[c][o].default
+                                    input_elem.defaultChecked = settings[c][o].default
                                 } else if (settings[c][o].options) {
                                     input_elem = document.createElement("select")
-                                    input_elem.setAttribute("onclick", "rando.changeSettingsSeed()")
+                                    input_elem.setAttribute("onchange", "rando.changeSettingsSeed()")
                                     for (const c2 in settings[c][o].options) {
                                         const optgroup = document.createElement("optgroup")
                                         optgroup.label = c2
@@ -130,7 +130,7 @@ class Randomizer {
                                     input_first = !input_first
                                 }
                             }
-                            settings_elem.appendChild(br)
+                            settings_elem.insertAdjacentHTML("beforeend", "<br>")
                         }
                         document.getElementById("rom_selection_screen").remove()
                         document.getElementById("rando_settings_change_screen").style.display = "block"
@@ -187,23 +187,38 @@ class Randomizer {
         this.loadingROM = true
         this.rando_status_elem = document.getElementById("rando_status_text")
         this.rando_status_elem.textContent = SBT("Changement d'emplacement...", "Shuffling Locations...")
-        const rando_settings = {}
-        for (const i in this.rando_settings) {
-            const elem = document.getElementById(i)
-            if (!elem || elem.getAttribute("disabled") == null) rando_settings[i] = this.rando_settings[i]
-        }
-        for (const ext of ["bps", "sym", "txt"]) {
-            const fetchStats = await fetch(`romhack_builds/${rando_settings.romhack_version}/ages.${ext}`)
-            if (fetchStats.status == 200 || fetchStats.status == 304) {
-                if (ext == "bps") this.pyodide.FS.writeFile("romhack.bps", await fetchStats.bytes());
-                else if (ext == "txt") this.pyodide.FS.writeFile("romhack_bugfixes.txt", await fetchStats.text());
-                else this.pyodide.FS.writeFile("romhack.txt", await fetchStats.text());
-            }
-        }
-        this.pyodide.runPythonAsync(this.pyCode + `\nrando.generate_seed('${JSON.stringify(rando_settings)}')`).then(locations => {
+        this.pyodide.FS.writeFile("/home/pyodide/rando_settings.py", `import json\ndef get():\n\treturn json.loads('${JSON.stringify(this.rando_settings)}')`)
+        this.pyodide.runPythonAsync(this.pyCode + `\nimport rando_settings\nrando.generate_seed(rando_settings.get())`).then(async patch_data => {
             this.rando_status_elem.textContent = SBT("Modification de la ROM...", "Patching ROM...")
-            console.log(locations)
+            for (const ext of ["bps", "sym", "txt"]) {
+                const romhack_builds_base = `romhack_builds/${this.rando_settings.romhack_version}`
+                const fetchStats = await fetch(romhack_builds_base + `/ages.${ext}`)
+                if (fetchStats.status == 200 || fetchStats.status == 304) {
+                    if (ext == "bps") this.pyodide.FS.writeFile("romhack.bps", await fetchStats.bytes());
+                    else if (ext == "txt") {
+                        const fixes = await fetchStats.text()
+                        this.pyodide.FS.writeFile("romhack_bugfixes.txt", fixes);
+                        this.pyodide.FS.mkdir("/home/pyodide/bugfixes")
+                        for (const line of fixes.split("\n")) {
+                            this.pyodide.FS.writeFile(`/home/pyodide/bugfixes/${line.trim()}`, await (await fetch(romhack_builds_base + `/bugfixes/${line.trim()}`)).bytes())
+                        }
+                    }
+                    else this.pyodide.FS.writeFile("romhack.sym", await fetchStats.text());
+                }
+            }
+            this.pyodide.runPythonAsync(this.pyCode + `\nimport json\nrando.patch_rom(json.loads('${patch_data}'))`).then(i => {
+                const rom_info = JSON.parse(i)
+                if (rom_info.patched) {
+                    this.showRandoScreen(true)
+                    const blob = new Blob(this.pyodide.FS.readFile("romhack.gbc"))
+                    document.getElementById("randoRomDownload").setAttribute("href", URL.createObjectURL(blob));
+                }
+            })
         })
+    }
+    showRandoScreen(preOrPost = false) {
+        document.getElementById("prerando").style.display = preOrPost ? "none" : "block";
+        document.getElementById("postrando").style.display = preOrPost ? "block" : "none";
     }
 }
 

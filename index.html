@@ -15,6 +15,8 @@
         href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap"
         rel="stylesheet">
     <link href="frontend/styles/app.css" rel="stylesheet">
+    <script type="text/javascript" src="https://www.marcrobledo.com/RomPatcher.js/rom-patcher-js/RomPatcher.webapp.js"></script>
+	<script type="text/javascript" src="https://www.marcrobledo.com/RomPatcher.js/webapp/webapp.js"></script>
 </head>
 
 <body>
@@ -71,6 +73,7 @@
                     </a>
                 </div>
                 <div id="rando_settings_change_screen" style="display: none">
+                    <h2>Randomizer Settings</h2>
                     <div class="hearts" aria-hidden="true" id="rando_status_text"></div>
                     <label for="rando_seed" data-en="Seed:">Graine:</label> <input type="text" id="rando_seed" oninput="rando.changeSettingsFromSeed()" style="width: 50%">
                     <a onclick="navigator.clipboard.readText().then(t => {
@@ -99,7 +102,7 @@
             <div class="wrap two" style="align-items:start">
                 <div>
                     <h2><small data-en="&lt;a href=&quot;javascript:;&quot; onclick=&quot;rando.switchBackToGenScreen()&quot;&gt;Back To Generation Screen&lt;/a&gt;">
-                        <a href="javascript:;" onclick="rando.switchBackToGenScreen()">Retour à l'écran « Génération »</a>
+                        <a href="javascript:;" onclick="rando.showRandoScreen()">Retour à l'écran « Génération »</a>
                     </small><span data-en="Congratulations! your game has successfully been randomized!">Félicitations! La génération aléatoire de votre jeu s'est déroulée avec succès!</span>
                     </h2>
                     <p
@@ -116,10 +119,9 @@
                         data-en-alt="Language choice: French or English" loading="lazy">
                 </div>
                 <div class="card">
-                    <a class="play" href="https://github.com/soaresden/ZeldaGullsOfLife/releases/tag/v1.0-1.1"
-                        data-en="▶ Download the patch&lt;small&gt;v1.0/1.1 · gulls_of_life.bps&lt;/small&gt;">▶
-                        Télécharger le
-                        patch<small>v1.0/1.1 · gulls_of_life.bps</small></a>
+                    <a class="play" id="randoRomDownload"
+                        data-en="▶ Download the randomized ROM&lt;small&gt;romhack.gbc&lt;/small&gt;" download="romhack.gbc">▶
+                        Télécharger la ROM aléatoire<small>romhack.gbc</small></a>
                     <ul class="keys">
                         <li><b data-en="Select">Select</b><span data-en="the map">la carte</span></li>
                         <li><b data-en="Hold Select">Select maintenu</b><span
