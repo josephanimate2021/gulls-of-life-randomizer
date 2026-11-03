@@ -2,10 +2,9 @@ import random
 import hashlib
 import json
 import base64
-import os
 
 from .data.locations import locations_data, ROM_HASH
-from .generation.logic_predates import *
+#from .data.items import ITEMS_DATA
 from .ap.patching.RomData import RomData
 from .patching.functions import *
 from .patching.sym import sym
@@ -28,18 +27,24 @@ class Randomizer():
                 print("Using Vanila Locations because item shuffling was not selected.")
                 for location, info in locations_data.items():
                     settings["locations"][location] = info["vanila_item"]
-        # TODO: item shuffler
+            else:
+                while len(settings["locations"]) < len(locations_data):
+                    location = random.choice(list(locations_data.keys()))
+                    if location not in settings["locations"]:
+                        item = random.choice(list(locations_data.values()))["vanila_item"]
+                        settings["locations"][location] = item
         return json.dumps(settings)
 
     def patch_rom(self, patch_data: dict) -> dict[str, str]:
         rom_data = RomData(open("romhack.gbc", "rb").read())
         # TODO: Change locations of items inside the ROM.
         parsed_sym = sym()
-        if os.path.exists("romhack_bugfixes.txt"):
-            for line in open("romhack_bugfixes.txt").readlines():
-                l = parsed_sym.find("label", line.strip().split(".")[0])
-                if l is not None:
-                    rom_data.write_bytes(l.address_in_rom(), open(f"bugfixes/{line.strip()}", "rb").read())
+
+        # Call all functions for rom patching.
+        apply_bugfixes(rom_data, parsed_sym)
+        apply_randomized_locations(rom_data, patch_data, parsed_sym)
+        remove_unneccessary_cutscenes(rom_data, parsed_sym)
+
         rom_data.update_header_checksum()
         rom_data.update_checksum(0x14e)
         open("romhack.gbc", "wb").write(rom_data.output())
