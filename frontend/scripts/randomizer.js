@@ -254,6 +254,11 @@ class Randomizer {
                 const rom_info = JSON.parse(i)
                 if (rom_info.patched) {
                     this.showRandoScreen(true)
+                    console.log(patch_data)
+                    document.getElementById("spoilerLogDownload").setAttribute("href", `data:application/json;base64,${btoa(JSON.stringify({
+                        seed: btoa(patch_data),
+                        locations: JSON.parse(patch_data).locations,
+                    }, null, "\t"))}`);
                     document.getElementById("randoRomDownload").setAttribute("href", `data:application/octet-stream;base64,${this.pyodide.FS.readFile("romhack.gbc").toBase64()}`);
                 }
             })

@@ -19,15 +19,15 @@ def apply_randomized_locations(rom: RomData, patch_data: dict, settings_copy: di
     """
     Applies randomized locations to the ROM data.
     """
+    print(patch_data, settings_copy)
     if settings_copy["shuffle_items"]:
         for location_name, location_data in locations_data.items():
             if (
                 'treasure_spawn_mode' not in location_data 
-                or 'room' not in location_data 
                 or location_name not in patch_data["locations"]
             ):
                 continue
-            if location_data['treasure_spawn_mode'] == TREASURE_SPAWN_CHEST:
+            if location_data['treasure_spawn_mode'] == TREASURE_SPAWN_CHEST and "room" in location_data:
                 table_addr = parsed_sym.find("label", "chestDataGroupTable")
                 chest_addr = rom.get_chest_addr(location_data['room'], table_addr.bank, table_addr.offset)
                 item_name = patch_data["locations"][location_name]
@@ -38,7 +38,7 @@ def apply_randomized_locations(rom: RomData, patch_data: dict, settings_copy: di
                 ) and not patch_data["keysanity"]:
                     treasure_subids = [0x01, 0x03]
                     item_ids[1] = treasure_subids[item_ids[0] - 0x30]
-                rom.write_bytes(chest_addr, get_item_id_and_subid(item_name))
+                rom.write_bytes(chest_addr, item_ids)
             else:
                 pass # TODO: collect mode on nonchest items.
 
