@@ -2,12 +2,12 @@ from .constants import *
 from .logic.logic_predicates import *
 
 locations_data = {
-    "Mist Island (Real World): Hardhat Worker": {
-        "vanila_item": "Sword",
-        "requirements": None, # None indicates that the location is always accessible from the last point, which is why we start from the top of the list and work our way down. If a location is not always accessible, we will need to add requirements for it.
-        "npc_itemGiveScript_addr": "balladeNpc01Script@loop",
-        "treasure_spawn_mode": TREASURE_SPAWN_INSTANT
-    },
+    #"Mist Island (Real World): Hardhat Worker": { Leaving this guy alone for now.
+        #"vanila_item": "Sword",
+        #"requirements": None, # None indicates that the location is always accessible from the last point, which is why we start from the top of the list and work our way down. If a location is not always accessible, we will need to add requirements for it.
+        #"npc_itemGiveScript_addr": 0x000a + "+balladeNpc01Script@loop",
+        #"treasure_spawn_mode": TREASURE_SPAWN_INSTANT
+    #},
     "Dark Lighthouse: Chest By Blue Statue": {
         "vanila_item": "Rupees (30)",
         "requirements": None,

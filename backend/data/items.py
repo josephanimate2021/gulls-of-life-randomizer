@@ -1,3 +1,5 @@
+from .items_classification import ItemClassification
+
 ITEMS_DATA = {
     #   "No Item": {
     #   'classification': ItemClassification.filler,
@@ -5,38 +7,41 @@ ITEMS_DATA = {
     #    'id': 0x00,
     #    'subid': 0x00
     #    },
+    "Progressive Shield": {
+        'classification': ItemClassification.progression,
+        'id': 0x01
+    },
     "Bombs (10)": {
+        'classification': ItemClassification.progression,
         'id': 0x03
     },
-    "Sword": {
+    "Progressive Sword": {
+        'classification': ItemClassification.progression,
         'id': 0x05
     },
+    "Boomerang": {
+        'classification': ItemClassification.progression,
+        'id': 0x06
+    },
     "Lantern Of Dreams": {
-        'id': 0x11,
-        'subid': 0x02                                                                                                         
+        'classification': ItemClassification.progression,
+        'id': 0x11                                                                                                          
+    },
+    "Progressive Hook": {
+        'classification': ItemClassification.progression,
+        'id': 0x0a
+    },
+    "Cane of Somaria": {
+        'classification': ItemClassification.progression,
+        'id': 0x04
     },
     "Biggoron's Sword": {
-        'id': 0x0c,
-        'subid': 0x01
+        'classification': ItemClassification.progression,
+        'id': 0x0c
     },
     "Bombchus (10)": {
         'classification': ItemClassification.progression,
         'id': 0x0d
-    },
-    "Ricky's Flute": {
-        'classification': ItemClassification.progression,
-        'id': 0x0e,
-        'subid': 0x00
-    },
-    "Dimitri's Flute": {
-        'classification': ItemClassification.progression,
-        'id': 0x0e,
-        'subid': 0x01
-    },
-    "Moosh's Flute": {
-        'classification': ItemClassification.progression,
-        'id': 0x0e,
-        'subid': 0x02
     },
     "Seed Shooter": {
         'classification': ItemClassification.progression,
@@ -145,12 +150,12 @@ ITEMS_DATA = {
         'id': 0x30,
         'subid': 0x00
     },
-    "Small Key (Spirit's Grave)": {
+    "Small Key (Dark Lighthouse)": {
         'classification': ItemClassification.progression,
         'id': 0x30,
         'subid': 0x01
     },
-    "Small Key (Wing Dungeon)": {
+    "Small Key (Toy Chest)": {
         'classification': ItemClassification.progression,
         'id': 0x30,
         'subid': 0x02
@@ -200,12 +205,12 @@ ITEMS_DATA = {
         'id': 0x30,
         'subid': 0x80
     },
-    "Master Key (Spirit's Grave)": {
+    "Master Key (Dark Lighthouse)": {
         'classification': ItemClassification.progression,
         'id': 0x30,
         'subid': 0x81
     },
-    "Master Key (Wing Dungeon)": {
+    "Master Key (Toy Chest)": {
         'classification': ItemClassification.progression,
         'id': 0x30,
         'subid': 0x82
@@ -250,12 +255,12 @@ ITEMS_DATA = {
         'id': 0x30,
         'subid': 0x8b
     },
-    "Boss Key (Spirit's Grave)": {
+    "Boss Key (Dark Lighthouse)": {
         'classification': ItemClassification.progression,
         'id': 0x31,
         'subid': 0x01
     },
-    "Boss Key (Wing Dungeon)": {
+    "Boss Key (Toy Chest)": {
         'classification': ItemClassification.progression,
         'id': 0x31,
         'subid': 0x02
@@ -290,12 +295,12 @@ ITEMS_DATA = {
         'id': 0x31,
         'subid': 0x08
     },
-    "Compass (Spirit's Grave)": {
+    "Compass (Dark Lighthouse)": {
         'classification': ItemClassification.useful,
         'id': 0x32,
         'subid': 0x01
     },
-    "Compass (Wing Dungeon)": {
+    "Compass (Toy Chest)": {
         'classification': ItemClassification.useful,
         'id': 0x32,
         'subid': 0x02
@@ -335,12 +340,12 @@ ITEMS_DATA = {
         'id': 0x32,
         'subid': 0x08
     },
-    "Dungeon Map (Spirit's Grave)": {
+    "Dungeon Map (Dark Lighthouse)": {
         'classification': ItemClassification.useful,
         'id': 0x33,
         'subid': 0x01
     },
-    "Dungeon Map (Wing Dungeon)": {
+    "Dungeon Map (Toy Chest)": {
         'classification': ItemClassification.useful,
         'id': 0x33,
         'subid': 0x02
@@ -392,6 +397,7 @@ ITEMS_DATA = {
     #         'id': 0x36
     #     },
 
+    # TODO: Trade Items (if any)
     "Poe Clock": {
         'classification': ItemClassification.progression_skip_balancing,
         'id': 0x3d
@@ -441,6 +447,7 @@ ITEMS_DATA = {
          'id': 0x3a
     },
 
+    # Not sure we will be using these as well.
     "Bomb Flower": {
         'classification': ItemClassification.progression_skip_balancing,
         'id': 0x49
@@ -457,6 +464,7 @@ ITEMS_DATA = {
         'classification': ItemClassification.progression,
         'id': 0x52
     },
+
     "Crown Key": {
         'classification': ItemClassification.progression,
         'id': 0x43
@@ -500,10 +508,6 @@ ITEMS_DATA = {
     "Old Mermaid Key": {
         'classification': ItemClassification.progression,
         'id': 0x45
-    },
-    "Ricky's Gloves": {
-        'classification': ItemClassification.progression,
-        'id': 0x48
     },
     "Rock Brisket": {
         'classification': ItemClassification.progression_skip_balancing,

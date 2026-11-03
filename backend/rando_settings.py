@@ -9,8 +9,7 @@ SETTINGS = {
             "fr": "Mélanger les donjons"
         },
         "shuffle_items": {
-            "default": False,
-            "disabled": True,
+            "default": True,
             "fr": "Mélanger les objets"
         },
         "keysanity": {
@@ -27,6 +26,15 @@ SETTINGS = {
             "default": False,
             "disabled": True,
             "fr": "Tout mélanger"
+        },
+        "logic": {
+            "default": "casual",
+            "options": {
+                "none": ["Aucune logique", "No Logic"],
+                "casual": ["Logique de base", "Basic Logic"],
+                "medium_logic": ["Logique complète", "Full Logic"]
+            },
+            "fr": "Logique"
         }
     },
     1: {
@@ -38,7 +46,7 @@ SETTINGS = {
                 },
                 3: {},
                 4: {
-                    "dev": ["Dev Build", "Version de développement"]
+                    "dev": ["Version de développement", "Dev Build"]
                 }
             }
         }
@@ -60,7 +68,8 @@ def stringify_settings(lang_index):
         for p2 in list(SETTINGS[p].keys()):
             if "options" in SETTINGS[p][p2]:
                 for p3 in list(SETTINGS[p][p2]["options"].keys()):
-                    m_settings[p2]["options"][CATS_BY_LANG[p3][lang_index]] = SETTINGS[p][p2]["options"][p3]
-                    del m_settings[p2]["options"][p3]
+                    if isinstance(SETTINGS[p][p2]["options"][p3], dict):
+                        m_settings[p2]["options"][CATS_BY_LANG[p3][lang_index]] = SETTINGS[p][p2]["options"][p3]
+                        del m_settings[p2]["options"][p3]
         settings[CATS_BY_LANG[p][lang_index]] = m_settings
     return json.dumps(settings)

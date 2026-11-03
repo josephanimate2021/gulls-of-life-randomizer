@@ -4,6 +4,7 @@ import json
 import base64
 
 from .data.locations import locations_data, ROM_HASH
+from .data.constants import DUNGEON_NAMES
 #from .data.items import ITEMS_DATA
 from .ap.patching.RomData import RomData
 from .patching.functions import *
@@ -28,21 +29,41 @@ class Randomizer():
                 for location, info in locations_data.items():
                     settings["locations"][location] = info["vanila_item"]
             else:
-                while len(settings["locations"]) < len(locations_data):
-                    location = random.choice(list(locations_data.keys()))
-                    if location not in settings["locations"]:
-                        item = random.choice(list(locations_data.values()))["vanila_item"]
-                        settings["locations"][location] = item
+                def shuffle_locations():
+                    while len(settings["locations"]) < len(locations_data):
+                        location = random.choice(list(locations_data.keys()))
+                        if location not in settings["locations"]:
+                            item = random.choice(list(locations_data.values()))["vanila_item"]
+                            settings["locations"][location] = item
+                shuffle_locations()
+                while not settings["keysanity"]: # Ensure that small or boss keys are within their dungeons, even with no logic.
+                    for location in list(settings["locations"].keys()):
+                        item = settings["locations"][location]
+                        if (
+                            item.startswith("Small Key")
+                            or item.startswith("Boss Key")
+                        ) and "dungeon" in locations_data[location] and not item.endswith(f"({DUNGEON_NAMES[locations_data[location]['dungeon']]})"):
+                            settings["locations"] = {}
+                            shuffle_locations()
+                            break
+                    if len(settings["locations"]) == len(locations_data):
+                        break
+                    
+
+                if settings["logic"] != "none":
+                    print("Using Randomized Locations because item shuffling was selected.")
+        open("settings_copy.json", "w").write(json.dumps(settings_copy))
         return json.dumps(settings)
 
     def patch_rom(self, patch_data: dict) -> dict[str, str]:
         rom_data = RomData(open("romhack.gbc", "rb").read())
+        settings_copy = json.loads(open("settings_copy.json", "r").read())
         # TODO: Change locations of items inside the ROM.
         parsed_sym = sym()
 
         # Call all functions for rom patching.
         apply_bugfixes(rom_data, parsed_sym)
-        apply_randomized_locations(rom_data, patch_data, parsed_sym)
+        apply_randomized_locations(rom_data, patch_data, settings_copy, parsed_sym)
         remove_unneccessary_cutscenes(rom_data, parsed_sym)
 
         rom_data.update_header_checksum()

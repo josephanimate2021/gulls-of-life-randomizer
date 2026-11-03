@@ -126,19 +126,23 @@ class Randomizer {
                                     input_first = true
                                     input_elem.defaultChecked = settings[c][o].default
                                 } else if (settings[c][o].options) {
+                                    settings_elem.insertAdjacentHTML("beforeend", "<br>")
                                     input_elem = document.createElement("select")
                                     input_elem.setAttribute("onchange", "rando.changeSettingsSeed()")
                                     for (const c2 in settings[c][o].options) {
-                                        const optgroup = document.createElement("optgroup")
-                                        optgroup.label = c2
-                                        for (const p in settings[c][o].options[c2]) {
+                                        if (typeof settings[c][o].options[c2] == "object" && !Array.isArray(settings[c][o].options[c2])) {
+                                            const optgroup = document.createElement("optgroup")
+                                            optgroup.label = c2
+                                            for (const p in settings[c][o].options[c2]) appendOption(optgroup, settings[c][o].options[c2], p)
+                                            input_elem.appendChild(optgroup)
+                                        } else appendOption(input_elem, {[c2]: settings[c][o].options[c2]}, c2)
+                                        function appendOption(elem, info, p) {
                                             const option_elem = document.createElement("option")
                                             option_elem.value = p
-                                            if (settings[c][o].default == p) option_elem.selected = true
-                                            option_elem.textContent = SBT(settings[c][o].options[c2][p][1], settings[c][o].options[c2][p][0])
-                                            optgroup.appendChild(option_elem)
+                                            if (settings[c][o].default == p) option_elem.setAttribute("selected", "")
+                                            option_elem.textContent = SBT(info[p][0], info[p][1])
+                                            elem.appendChild(option_elem)
                                         }
-                                        input_elem.appendChild(optgroup)
                                     }
                                 }
                                 input_elem.id = o
@@ -146,7 +150,7 @@ class Randomizer {
                                 label_elem.setAttribute("for", o)
                                 for (let i = 0; i < 2; i++) {
                                     if (input_first) settings_elem.insertAdjacentHTML("beforeend", `${i == 1 ? ":" : ""} ${input_elem.outerHTML}`);
-                                    else label_elem.textContent = SBT(settings[c][o].fr, o.split("_").map(a => {
+                                    else label_elem.textContent = " " + SBT(settings[c][o].fr, o.split("_").map(a => {
                                         const rest = a.substring(1)
                                         return a.split(rest)[0].toUpperCase() + rest
                                     }).join(" ")), settings_elem.appendChild(label_elem)
