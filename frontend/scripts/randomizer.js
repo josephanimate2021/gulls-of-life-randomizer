@@ -6,23 +6,46 @@ class Randomizer {
         this.rando_settings = {
             locations: {}
         }
+        for (const SCRIPT_PATH of [
+            'modules/BinFile.js',
+            'modules/HashCalculator.js',
+            'modules/RomPatcher.format.ips.js',
+            'modules/RomPatcher.format.ups.js',
+            'modules/RomPatcher.format.aps_n64.js',
+            'modules/RomPatcher.format.aps_gba.js',
+            'modules/RomPatcher.format.bps.js',
+            'modules/RomPatcher.format.rup.js',
+            'modules/RomPatcher.format.ppf.js',
+            'modules/RomPatcher.format.bdf.js',
+            'modules/RomPatcher.format.pmsr.js',
+            'modules/RomPatcher.format.vcdiff.js',
+            'modules/zip.js/zip.min.js',
+            'RomPatcher.js'
+        ]) {
+            const script = document.createElement('script');
+            script.src = "https://www.marcrobledo.com/RomPatcher.js/rom-patcher-js/" + SCRIPT_PATH;
+            script.type = 'text/javascript';
+            document.head.appendChild(script);
+        }
     }
     async romFileSelect(btn) {
         if (this.loadingROM) return;
-        this.pyodide ||= await loadPyodide().catch(e => {
-            this.rom_stats_elem.textContent = SBT("Pyodide n'a pas pu être chargé pour une raison inconnue. Veuillez vérifier votre code.", "Pyodide could not be loaded for some reason. please check your code.");
-        });
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.gbc,.zip';
+        input.title = SBT('Sélectionner un fichier ROM', 'Select a ROM file');
         input.onchange = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
             this.loadingROM = true;
             this.rom_stats_elem.textContent = SBT("Chargement de la ROM...", "Loading ROM...");
-            const reader = new FileReader();
-            reader.onload = async (event) => {
-                const arrayBuffer = event.target.result;
+            this.romFile = new BinFile(file, async (binFile) => {
                 const pyodide = await loadPyodide().catch(e => {
+                    console.error(e);
+                    this.loadingROM = false;
                     this.rom_stats_elem.textContent = SBT("Échec du chargement de la ROM. Pyodide n'a pas pu être chargé pour une raison inconnue. Veuillez vérifier votre code.", "Loading ROM failed. Pyodide could not be loaded for some reason. please check your code.");
                 });
+                if (!this.loadingROM) return;
                 const imported_files = []
                 async function mount_import_files(code, og_file_location = "") {
                     const lines = code.split("\n")
@@ -78,7 +101,7 @@ class Randomizer {
                 this.pyodide = pyodide
                 this.pyodide.FS.writeFile(`/home/pyodide/__init__.py`, "")
                 this.rom_stats_elem.textContent = SBT("Vérification de la ROM...", "Validating ROM...");
-                this.pyodide.FS.writeFile("ages.gbc", new Uint8Array(arrayBuffer));
+                this.pyodide.FS.writeFile("ages.gbc", binFile._u8array);
                 this.pyodide.runPythonAsync(this.pyCode + "\nrando.validate_rom()").then(async (isValid) => {
                     if (isValid) {
                         this.rom_stats_elem.textContent = SBT("Chargement des paramètres du générateur aléatoire...", "Loading randomizer settings...");
@@ -143,8 +166,7 @@ class Randomizer {
                     this.rom_stats_elem.textContent = (SBT("Erreur lors de la validation de la ROM. Veuillez vérifier la console pour plus de détails.", "Error validating ROM. Please check the console for more details."));
                 })
                 this.loadingROM = false;
-            };
-            reader.readAsArrayBuffer(file);
+            });
         };
         input.click();
     }
@@ -191,27 +213,44 @@ class Randomizer {
         this.pyodide.runPythonAsync(this.pyCode + `\nimport rando_settings\nrando.generate_seed(rando_settings.get())`).then(async patch_data => {
             this.rando_status_elem.textContent = SBT("Modification de la ROM...", "Patching ROM...")
             for (const ext of ["bps", "sym", "txt"]) {
+                if (!this.loadingROM) break;
                 const romhack_builds_base = `romhack_builds/${this.rando_settings.romhack_version}`
                 const fetchStats = await fetch(romhack_builds_base + `/ages.${ext}`)
                 if (fetchStats.status == 200 || fetchStats.status == 304) {
-                    if (ext == "bps") this.pyodide.FS.writeFile("romhack.bps", await fetchStats.bytes());
+                    if (ext == "bps") {
+                        const patchFile=new BinFile(await fetchStats.bytes());
+                        patchFile.fileName="ages.bps";
+                        const patch=RomPatcher.parsePatchFile(patchFile);
+                        if (patch) try {
+                            this.pyodide.FS.writeFile("romhack.gbc", RomPatcher.applyPatch(this.romFile, patch, {})._u8array);
+                        } catch (e) {
+                            console.error(e.message);
+                            this.rando_status_elem.textContent = SBT("Échec de l'application du patch. Veuillez vérifier la console pour plus de détails.", "Failed to apply patch. Please check the console for more details.");
+                            this.loadingROM = false
+                        }
+                        else {
+                            console.error("Invalid patch file was provided.");
+                            this.rando_status_elem.textContent = SBT("Échec de l'application du patch. Veuillez vérifier la console pour plus de détails.", "Failed to apply patch. Please check the console for more details.");
+                            this.loadingROM = false
+                        }
+                    }
                     else if (ext == "txt") {
                         const fixes = await fetchStats.text()
                         this.pyodide.FS.writeFile("romhack_bugfixes.txt", fixes);
                         this.pyodide.FS.mkdir("/home/pyodide/bugfixes")
                         for (const line of fixes.split("\n")) {
+                            if (line.trim() == "") continue;
                             this.pyodide.FS.writeFile(`/home/pyodide/bugfixes/${line.trim()}`, await (await fetch(romhack_builds_base + `/bugfixes/${line.trim()}`)).bytes())
                         }
                     }
                     else this.pyodide.FS.writeFile("romhack.sym", await fetchStats.text());
                 }
             }
-            this.pyodide.runPythonAsync(this.pyCode + `\nimport json\nrando.patch_rom(json.loads('${patch_data}'))`).then(i => {
+            if (this.loadingROM) this.pyodide.runPythonAsync(this.pyCode + `\nimport json\nrando.patch_rom(json.loads('${patch_data}'))`).then(i => {
                 const rom_info = JSON.parse(i)
                 if (rom_info.patched) {
                     this.showRandoScreen(true)
-                    const blob = new Blob(this.pyodide.FS.readFile("romhack.gbc"))
-                    document.getElementById("randoRomDownload").setAttribute("href", URL.createObjectURL(blob));
+                    document.getElementById("randoRomDownload").setAttribute("href", `data:application/octet-stream;base64,${this.pyodide.FS.readFile("romhack.gbc").toBase64()}`);
                 }
             })
         })
