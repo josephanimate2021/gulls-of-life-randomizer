@@ -13,6 +13,7 @@ from .patching.sym import sym
 class Randomizer():
     def __init__(self):
         self.rom = open("ages.gbc", "rb").read()
+        self.location_data = {}
 
     def generate_seed(self, settings: dict):
         settings_copy = settings.copy()
@@ -20,33 +21,42 @@ class Randomizer():
             for p, v in settings.items():
                 if p == "shuffle_all":
                     continue
-                if isinstance(v, bool):
+                if isinstance(v, bool) and p != "guarentee_sword":
                     settings_copy[p] = True
 
         if len(settings["locations"]) == 0:
+            def shuffle_locations():
+                van_items = []
+                for location, info in locations_data.items():
+                    if (
+                        "not_compatiable_versions" in info and settings["romhack_version"] in info["not_compatiable_versions"]
+                    ) or (
+                        "compatiable_versions" in info and settings["romhack_version"] not in info["compatiable_versions"]
+                    ): 
+                        continue
+                    self.location_data[location] = info
+                    van_items.append(info["vanila_item"])
+                    settings["locations"][location] = info["vanila_item"]
+                if settings_copy["shuffle_items"]:
+                    random.shuffle(van_items)
+                    for i, location in enumerate(settings["locations"]):
+                        settings["locations"][location] = van_items[i]
+                print(settings["locations"])
+            shuffle_locations()
             if not settings_copy["shuffle_items"]:
                 print("Using Vanila Locations because item shuffling was not selected.")
-                for location, info in locations_data.items():
-                    settings["locations"][location] = info["vanila_item"]
             else:
-                def shuffle_locations():
-                    while len(settings["locations"]) < len(locations_data):
-                        location = random.choice(list(locations_data.keys()))
-                        if location not in settings["locations"]:
-                            item = random.choice(list(locations_data.values()))["vanila_item"]
-                            settings["locations"][location] = item
-                shuffle_locations()
                 while not settings["keysanity"]: # Ensure that small or boss keys are within their dungeons, even with no logic.
                     for location in list(settings["locations"].keys()):
                         item = settings["locations"][location]
                         if (
                             item.startswith("Small Key")
                             or item.startswith("Boss Key")
-                        ) and "dungeon" in locations_data[location] and not item.endswith(f"({DUNGEON_NAMES[locations_data[location]['dungeon']]})"):
+                        ) and ("dungeon" not in self.location_data[location] or not item.endswith(f"({DUNGEON_NAMES[self.location_data[location]['dungeon']]})")):
                             settings["locations"] = {}
                             shuffle_locations()
                             break
-                    if len(settings["locations"]) == len(locations_data):
+                    if len(settings["locations"]) == len(self.location_data):
                         break
                     
 

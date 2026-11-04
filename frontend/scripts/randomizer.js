@@ -140,14 +140,16 @@ class Randomizer {
                                             const option_elem = document.createElement("option")
                                             option_elem.value = p
                                             if (settings[c][o].default == p) option_elem.setAttribute("selected", "")
-                                            option_elem.textContent = SBT(info[p][0], info[p][1])
+                                            option_elem.textContent = Array.isArray(info[p]) ? SBT(info[p][0], info[p][1]) : info[p]
                                             elem.appendChild(option_elem)
                                         }
                                     }
                                 }
                                 input_elem.id = o
+                                input_elem.title = SBT(settings[c][o].description[0], settings[c][o].description[1])
                                 if (settings[c][o].disabled) input_elem.disabled = true
                                 label_elem.setAttribute("for", o)
+                                label_elem.title = input_elem.title
                                 for (let i = 0; i < 2; i++) {
                                     if (input_first) settings_elem.insertAdjacentHTML("beforeend", `${i == 1 ? ":" : ""} ${input_elem.outerHTML}`);
                                     else label_elem.textContent = " " + SBT(settings[c][o].fr, o.split("_").map(a => {

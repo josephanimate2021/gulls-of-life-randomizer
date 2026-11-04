@@ -15,6 +15,10 @@ def apply_bugfixes(rom_data: RomData, parsed_sym: sym) -> None:
             if l is not None:
                 rom_data.write_bytes(l.address_in_rom(), open(f"bugfixes/{line.strip()}", "rb").read())
 
+# helper function that adds param2 to i unless stopped by my base case, which is helpful for finding the right rom address for a certain param in a table despite changes in the disasm code.
+def find_address_for_param_helper(lineNumber, param, param2 = 4, i=0,c=0) -> int:
+    return i - param if c == lineNumber else find_address_for_param_helper(lineNumber, param, param2, i + param2, c + 1)
+
 def apply_randomized_locations(rom: RomData, patch_data: dict, settings_copy: dict, parsed_sym: sym) -> None:
     """
     Applies randomized locations to the ROM data.
@@ -36,8 +40,8 @@ def apply_randomized_locations(rom: RomData, patch_data: dict, settings_copy: di
                     item_name.startswith("Small Key")
                     or item_name.startswith("Boss Key")
                 ) and not patch_data["keysanity"]:
-                    treasure_subids = [0x01, 0x03]
-                    item_ids[1] = treasure_subids[item_ids[0] - 0x30]
+                    item_ids[1] = 0x03
+                print(item_name, item_ids)
                 rom.write_bytes(chest_addr, item_ids)
             else:
                 pass # TODO: collect mode on nonchest items.
@@ -56,11 +60,10 @@ def remove_unneccessary_cutscenes(rom_data: RomData, parsed_sym: sym) -> None:
     Removes unnecessary cutscenes and interactions from the ROM data.
     """
     groups: list[tuple[str, int]] = [
-        ("group1MapaaObjectData", 0), ("group1Map7bObjectData", 0), ("group2Map9eObjectData", 0)
-        #("group1Map9bObjectData", 4 * 2), ("group1Map9cObjectData", 4 * 2),
-        #("group1MapabObjectData", 4), ("group3Map9eObjectData", 4), ("group4Map13ObjectData", 4 * 3)
+        # these first three trigger an unnecessary cutscene that we don't want. the rest of the segull interactions can stay without issue.
+        ("group1MapaaObjectData", 0), ("group1Map7bObjectData", 0), ("group2Map9eObjectData", 0),
     ]
     for group, n in groups:
         l = parsed_sym.find("label", group)
-        if l is not None:
-            rom_data.write_bytes(l.address_in_rom() + n, [0x0b, 0x00, 0xf8, 0xf8])
+        if l is not None: # Place all mask salesman interactions in the same group.
+            rom_data.write_bytes(l.address_in_rom() + n, [0x97, 0x67, 0xf8, 0xf8])

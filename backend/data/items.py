@@ -25,7 +25,8 @@ ITEMS_DATA = {
     },
     "Lantern Of Dreams": {
         'classification': ItemClassification.progression,
-        'id': 0x11                                                                                                          
+        'id': 0x11,
+        'subid': 0x02                                                                                                          
     },
     "Progressive Hook": {
         'classification': ItemClassification.progression,
@@ -125,7 +126,8 @@ ITEMS_DATA = {
     },
     "Heart Container": {
         'classification': ItemClassification.useful,
-        'id': 0x2a
+        'id': 0x2a,
+        'subid': 0x01
     },
     "Piece of Heart": {
         'classification': ItemClassification.useful,

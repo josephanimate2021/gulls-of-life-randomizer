@@ -12,13 +12,23 @@ locations_data = {
         "vanila_item": "Rupees (30)",
         "requirements": None,
         "room": 0x041f,
+        "not_compatiable_versions": ["1.0_1"],
         "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
         "dungeon": 1
     },
     "Dark Lighthouse: Chest With Lever": {
         "vanila_item": "Rupees (50)",
         "requirements": None,
+        "not_compatiable_versions": ["1.0_1"],
         "room": 0x041D,
+        "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
+        "dungeon": 1
+    },
+    "Dark Lighthouse: Chest With Pots And a Zol": {
+        "vanila_item": "Small Key (Dark Lighthouse)",
+        "requirements": None,
+        "compatiable_versions": ["1.0_1"],
+        "room": 0x041b,
         "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
         "dungeon": 1
     },
@@ -29,6 +39,7 @@ locations_data = {
                 ("Sword", 1)
             ]
         },
+        "not_compatiable_versions": ["1.0_1"],
         "room": 0x041e,
         "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
         "dungeon": 1
@@ -36,6 +47,7 @@ locations_data = {
      "Dark Lighthouse: Chest Across Holes": {
         "vanila_item": "Small Key (Dark Lighthouse)",
         "requirements": None,
+        "not_compatiable_versions": ["1.0_1"],
         "room": 0x041C,
         "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
         "dungeon": 1
@@ -43,7 +55,8 @@ locations_data = {
     "Dark Lighthouse: Lantern Chest": {
         "vanila_item": "Lantern Of Dreams",
         "requirements": {
-            "all": [
+            "any": [
+                has_first_version(),
                 has_small_keys(1, 1)
             ]
         }, # If we don't require one small key here, we will encounter a softlock because the creator chose to place a keydoor in a room where you can access it after going through other rooms.
@@ -55,7 +68,7 @@ locations_data = {
         "vanila_item": "Small Key (Dark Lighthouse)",
         "requirements": {
             "all": [
-                has_small_keys(1, 2),
+                has_small_keys(1, 2), # Keeping this in despite the oldest version being present to prevent softlocks.
                 ("Lantern Of Dreams", 1)
             ]
         },
@@ -77,7 +90,8 @@ locations_data = {
                 has_small_keys(1, 3)
             ]
         },
-        "room": 0x041A,
+        "not_compatiable_versions": ["1.0_1"],
+        "room": 0x0419,
         "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
         "dungeon": 1
     },
