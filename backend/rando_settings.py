@@ -14,6 +14,11 @@ SETTINGS = {
             "description": ["Lorsque cette option est activée, tous les objets du jeu seront mélangés.", "When enabled, all ingame items will be shuffled around."],
             "fr": "Mélanger les objets"
         },
+        "show_ballade_cutscenes": {
+            "default": False,
+            "description": ["Lorsque cette fonctionnalité est activée, vous découvrirez des cinématiques mettant en scène Marin la mouette et d'autres personnages au sein de l'objet d'interaction « Ballade ». Par défaut, cette fonctionnalité est désactivée, car son implémentation dans un contexte aléatoire n'a pas de sens. N'activez cette fonctionnalité que si c'est la première fois que vous jouez à « Gulls of Life ».", "When enabled, you will be greeted with cutscenes from marin the seagull and others within the ballade interaction object. By default, this feature is disabled because it dosen't make sense to have that implemented in rando context. Only enable this feature if this is your first time playing gulls of life."],
+            "fr": "Afficher les cinématiques de Ballade"
+        },
         "keysanity": {
             "default": False,
             "disabled": True,
@@ -56,7 +61,9 @@ SETTINGS = {
                     "1.0_1.1": ["v1.0/1.1 (Dernière)", "v1.0/1.1 (Latest)"],
                     "1.0_1": "v1.0/1",
                 },
-                3: {},
+                3: {
+                    "1.0_2": "v1.0/2"
+                },
                 4: {
                     "dev": ["Version de développement", "Dev Build"]
                 }
@@ -70,7 +77,7 @@ CATS_BY_LANG = [
     ["Options logiques", "Logic Options"],
     ["Divers", "Misc"],
     ["Versions stables", "Stable Builds"],
-    ["Versions bêta (à venir)", "Beta Builds (Coming Soon)"],
+    ["Versions bêta", "Beta Builds"],
     ["Versions pour développeurs", "Developer Builds"]
 ]
 

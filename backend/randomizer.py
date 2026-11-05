@@ -7,6 +7,7 @@ from .data.locations import locations_data, ROM_HASH
 from .data.constants import DUNGEON_NAMES
 #from .data.items import ITEMS_DATA
 from .ap.patching.RomData import RomData
+from .ap.patching.z80asm.Assembler import *
 from .patching.functions import *
 from .patching.sym import sym
 
@@ -16,14 +17,17 @@ class Randomizer():
         self.location_data = {}
 
     def generate_seed(self, settings: dict):
+        # Check to see if the shuffle_all setting is checked. If so, check all other items assosiated with it.
         settings_copy = settings.copy()
+        excempt_settings = ["guarentee_sword", "show_ballade_cutscenes"]
         if settings["shuffle_all"]:
             for p, v in settings.items():
                 if p == "shuffle_all":
                     continue
-                if isinstance(v, bool) and p != "guarentee_sword":
+                if isinstance(v, bool) and p not in excempt_settings:
                     settings_copy[p] = True
 
+        # Shuffle locations if the seed dosen't contain any.
         if len(settings["locations"]) == 0:
             def shuffle_locations():
                 van_items = []
@@ -45,7 +49,7 @@ class Randomizer():
             shuffle_locations()
             if not settings_copy["shuffle_items"]:
                 print("Using Vanila Locations because item shuffling was not selected.")
-            else:
+            else: # Run the randomizer if shuffle items or shuffle_all is enabled.
                 while not settings["keysanity"]: # Ensure that small or boss keys are within their dungeons, even with no logic.
                     for location in list(settings["locations"].keys()):
                         item = settings["locations"][location]
@@ -66,18 +70,46 @@ class Randomizer():
         return json.dumps(settings)
 
     def patch_rom(self, patch_data: dict) -> dict[str, str]:
-        rom_data = RomData(open("romhack.gbc", "rb").read())
+        # Define variables
+        rom = open("romhack.gbc", "rb").read()
+        rom_data = RomData(rom)
         settings_copy = json.loads(open("settings_copy.json", "r").read())
-        # TODO: Change locations of items inside the ROM.
-        parsed_sym = sym()
+        parsed_sym = sym("romhack.sym")
+        asm_code = {}
+
+        # define assembler things inside the Randomizer class.
+        bank_caves = [int(i, 0) for i in json.loads(open("romhack.json").read())]
+        bank_caves[0x14] = 0x3c99 # Manually modifying bank 14 because the size of a function in there is oversized.
+        
+        ringMenuBeg = parsed_sym.find("label", "runRingMenu")
+        ringMenuEnd = parsed_sym.find("label", "saveQuitMenu_checkIsGameOver")
+        bank_caves[0x02] = [
+            [ringMenuBeg.offset, ringMenuEnd.offset], # Using the ring menu since this hack dosen't use rings. (Gives us lots of space here)
+            bank_caves[0x02] # end of bank
+        ]
+
+        assembler = Z80Assembler(bank_caves, {}, rom)
 
         # Call all functions for rom patching.
         apply_bugfixes(rom_data, parsed_sym)
         apply_randomized_locations(rom_data, patch_data, settings_copy, parsed_sym)
-        remove_unneccessary_cutscenes(rom_data, parsed_sym)
+        remove_unneccessary_cutscenes(rom_data, parsed_sym, patch_data)
+        add_warp_to_start(patch_data, parsed_sym, asm_code)
 
+        # Compile ASM code.
+        print(f"Compiling ASM files...")
+        print(asm_code)
+        for metalabel, contents in asm_code.items():
+            assembler.add_block(Z80Block(metalabel, contents))
+        assembler.compile_all()
+        for block in assembler.blocks:
+            rom_data.write_bytes(block.addr.address_in_rom(), block.byte_array)
+
+        # Update checksums
         rom_data.update_header_checksum()
         rom_data.update_checksum(0x14e)
+
+        # Write the ROM result and then return the infomation.
         open("romhack.gbc", "wb").write(rom_data.output())
         return json.dumps({
             "seed": base64.b64encode(str(patch_data).encode("ascii")).decode("ascii"),

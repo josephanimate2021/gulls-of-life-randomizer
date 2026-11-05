@@ -6,8 +6,8 @@ def str_hex_to_int(h) -> int:
 
 class sym():
     bank_limit = 0x0b
-    def __init__(self):
-        with open("romhack.sym", "rt") as f:
+    def __init__(self, sym_path):
+        with open(sym_path, "rt") as f:
             self.array = []
             array = []
             code = f.readline()

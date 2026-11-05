@@ -68,6 +68,18 @@ class Randomizer {
                             const file = path.join("/") + ".py"
                             if (blank_paths.length == 0) file_location += "/"
                             file_location += file;
+                            const array = []
+                            const split_filelocations = file_location.split("/")
+                            for (let i = 0; i < split_filelocations.length; i++) {
+                                const loc = split_filelocations[i]
+                                if (loc != "") array.push(loc);
+                                if (loc.startsWith("..")) {
+                                    array.splice(i, 1)
+                                    for (let x = loc.length; x > 0; x--) array.splice(i - (loc.length - 1), 1)
+                                }
+                            }
+                            file_location = array.join("/")
+                            console.log(file_location)
                             if (imported_files.includes(file_location)) {
                                 lines[i] = ""
                                 continue
@@ -98,6 +110,7 @@ class Randomizer {
                     this.rom_stats_elem.textContent = SBT("Chargement de randomizer.py...", "Loading randomizer.py...");
                     this.pyCode = await mount_import_files(await (await fetch("backend/randomizer.py")).text());
                 }
+                console.log(this.pyCode)
                 this.pyodide = pyodide
                 this.pyodide.FS.writeFile(`/home/pyodide/__init__.py`, "")
                 this.rom_stats_elem.textContent = SBT("Vérification de la ROM...", "Validating ROM...");
@@ -218,7 +231,7 @@ class Randomizer {
         this.pyodide.FS.writeFile("/home/pyodide/rando_settings.py", `import json\ndef get():\n\treturn json.loads('${JSON.stringify(this.rando_settings)}')`)
         this.pyodide.runPythonAsync(this.pyCode + `\nimport rando_settings\nrando.generate_seed(rando_settings.get())`).then(async patch_data => {
             this.rando_status_elem.textContent = SBT("Modification de la ROM...", "Patching ROM...")
-            for (const ext of ["bps", "sym", "txt"]) {
+            for (const ext of ["bps", "sym", "txt", "json"]) {
                 if (!this.loadingROM) break;
                 const romhack_builds_base = `romhack_builds/${this.rando_settings.romhack_version}`
                 const fetchStats = await fetch(romhack_builds_base + `/ages.${ext}`)
@@ -249,7 +262,7 @@ class Randomizer {
                             this.pyodide.FS.writeFile(`/home/pyodide/bugfixes/${line.trim()}`, await (await fetch(romhack_builds_base + `/bugfixes/${line.trim()}`)).bytes())
                         }
                     }
-                    else this.pyodide.FS.writeFile("romhack.sym", await fetchStats.text());
+                    else this.pyodide.FS.writeFile(`romhack.${ext}`, await fetchStats.text());
                 }
             }
             if (this.loadingROM) this.pyodide.runPythonAsync(this.pyCode + `\nimport json\nrando.patch_rom(json.loads('${patch_data}'))`).then(i => {
