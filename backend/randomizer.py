@@ -93,8 +93,6 @@ class Randomizer():
 
         assembler = Z80Assembler(bank_caves, DEFINES, rom)
 
-        print(assembler.defines)
-
         # Call all functions for rom patching.
         apply_bugfixes(rom_data, parsed_sym)
         apply_randomized_locations(rom_data, patch_data, settings_copy, parsed_sym)
