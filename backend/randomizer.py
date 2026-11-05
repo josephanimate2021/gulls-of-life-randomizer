@@ -10,6 +10,7 @@ from .ap.patching.RomData import RomData
 from .ap.patching.z80asm.Assembler import *
 from .patching.functions import *
 from .patching.sym import sym
+from .patching.defines import DEFINES
 
 class Randomizer():
     def __init__(self):
@@ -87,8 +88,12 @@ class Randomizer():
             [ringMenuBeg.offset, ringMenuEnd.offset], # Using the ring menu since this hack dosen't use rings. (Gives us lots of space here)
             bank_caves[0x02] # end of bank
         ]
+        for p, v in parsed_sym.get_labels(as_defines=True).items():
+            DEFINES[p] = v
 
-        assembler = Z80Assembler(bank_caves, {}, rom)
+        assembler = Z80Assembler(bank_caves, DEFINES, rom)
+
+        print(assembler.defines)
 
         # Call all functions for rom patching.
         apply_bugfixes(rom_data, parsed_sym)

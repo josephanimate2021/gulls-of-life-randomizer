@@ -31,14 +31,14 @@ class sym():
                 info.append(stuff)
         return info
     
-    def get_labels(self, change_gbAddress_offset = True) -> Dict[str, GameboyAddress]:
+    def get_labels(self, change_gbAddress_offset = True, as_gbAddress = True, as_defines = False) -> Dict[str, GameboyAddress]:
         info = {}
         for stuff in self.browse_sym("labels"):
             address, label = stuff.split(" ")
             bank, addr = address.split(":")
-            if str_hex_to_int(addr[:1]) > self.bank_limit:
+            if str_hex_to_int(addr[:1]) > self.bank_limit and (as_gbAddress and not as_defines):
                 continue
-            info[label] = GameboyAddress(str_hex_to_int(bank), str_hex_to_int(addr), change_gbAddress_offset)
+            info[label] = GameboyAddress(str_hex_to_int(bank), str_hex_to_int(addr), change_gbAddress_offset) if as_gbAddress and not as_defines else address if not as_defines else f"${addr}"
         return info
 
     def get_defs(self) -> Dict[str, int]:

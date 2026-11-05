@@ -275,8 +275,17 @@ class Randomizer {
                         locations: JSON.parse(patch_data).locations,
                     }, null, "\t"))}`);
                     document.getElementById("randoRomDownload").setAttribute("href", `data:application/octet-stream;base64,${this.pyodide.FS.readFile("romhack.gbc").toBase64()}`);
+                    this.loadingROM = false
                 }
+            }).catch((error) => {
+                this.loadingROM = false
+                console.error("Error patching ROM:", error);
+                this.rom_stats_elem.textContent = (SBT("Erreur lors de la patching de la ROM. Veuillez vérifier la console pour plus de détails.", "Error patching ROM. Please check the console for more details."));
             })
+        }).catch((error) => {
+            this.loadingROM = false
+            console.error("Error running the randomizer:", error);
+            this.rom_stats_elem.textContent = (SBT("Erreur lors de l'exécution du générateur aléatoire. Veuillez vérifier la console pour plus de détails.", "Error running the randomizer. Please check the console for more details."));
         })
     }
     showRandoScreen(preOrPost = false) {

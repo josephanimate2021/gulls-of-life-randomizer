@@ -64,14 +64,14 @@ def remove_unneccessary_cutscenes(rom_data: RomData, parsed_sym: sym, patch_data
     Removes unnecessary cutscenes and interactions from the ROM data.
     """
     groups: list[tuple[str, int]] = [
-        # these first three trigger an unnecessary cutscene that we don't want. the rest of the segull interactions can stay without issue.
+        # these first two trigger an unnecessary cutscene that we don't want. the rest of the segull interactions can stay without issue.
         ("group1MapaaObjectData", 0), ("group2Map9eObjectData", 0),
     ] if not patch_data["show_ballade_cutscenes"] else []
     if using_onedungeon_version(patch_data) and not patch_data["show_ballade_cutscenes"]: # we can only remove the segull interaction from room 7b if we're using an older version because newer versions since give you a check.
         groups.append(("group1Map7bObjectData", 0))
     for group, n in groups:
         l = parsed_sym.find("label", group)
-        if l is not None: # Place all mask salesman interactions in the same group.
+        if l is not None: # Place all INTERAC_97 interactions in the same group.
             rom_data.write_bytes(l.address_in_rom() + n, [0x97, 0x67, 0xff, 0xff])
 
 def add_warp_to_start(patch_data: dict, parsed_sym: sym, asm_code: dict):
@@ -79,38 +79,36 @@ def add_warp_to_start(patch_data: dict, parsed_sym: sym, asm_code: dict):
     bank, offset = menuFadeAddr.__str__().split(":")
     offsetAsInt = int(f"0x{offset}", 0)
     asm_code[f"{bank}/{simple_hex(offsetAsInt + 26, 4)}/"] = "call checkWarpToStart"
-    clearStaticObjectsAddr = parsed_sym.find("label", "clearStaticObjects").__str__().split(":")[1]
-    menuFadeOpenMenuAddr = parsed_sym.find("label", "menuStateFadeIntoMenu@openMenu").__str__().split(":")[1]
     asm_code[f"{bank}//checkWarpToStart"] = (
-        "ld a,($c481)\n"
-        "and $02 | $01\n"
-        "cp $02 | $01\n"
+        "ld a,(wKeysPressed)\n"
+        "and BTN_B | BTN_A\n"
+        "cp BTN_B | BTN_A\n"
         "jr nz,@done\n"
         
         "ld a,$01\n"
         "set 7,a\n"
-        "ld ($cc47),a\n"
+        "ld (wWarpDestGroup),a\n"
         "ld a,$aa        ; room ID\n"
-        "ld ($cc48),a\n"
+        "ld (wWarpDestRoom),a\n"
         "ld a,$42         ; Position in a room\n"
-        "ld ($cc4a),a\n"
+        "ld (wWarpDestPos),a\n"
         "ld a,$05\n"
-        "ld ($cc49),a\n"
+        "ld (wWarpTransition),a\n"
         "ld a,$03\n"
-        "ld ($cc4b),a\n"
+        "ld (wWarpTransition2),a\n"
         "ld a,$ff\n"
-        "ld ($cc8a),a\n"
+        "ld (wDisabledObjects),a\n"
         
-        f"call ${clearStaticObjectsAddr}\n"
+        "call clearStaticObjects\n"
         
         "ld a,$d0\n"
-        "ld ($cc2c),a\n"
+        "ld (wLinkObjectIndex),a\n"
         
         "ld a,$03\n"
-        "ld ($cbcc),a\n"
+        "ld (wMenuLoadState),a\n"
         "pop af      ; pop return addr from stack\n"
         "ret\n"
         
         "@done:\n"
-        f"jp ${menuFadeOpenMenuAddr}"
+        f"jp menuStateFadeIntoMenu@openMenu"
     )
