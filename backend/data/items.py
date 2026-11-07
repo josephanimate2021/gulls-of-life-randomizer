@@ -134,10 +134,11 @@ ITEMS_DATA = {
         'id': 0x2b,
         'subid': 0x01
     },
-    #"Progressive Flippers": {
-     #   'classification': ItemClassification.progression,
-      #  'id': 0x2e
-    #},
+    "Progressive Flippers": {
+        'classification': ItemClassification.progression,
+        'id': 0x2e,
+        'subid': 0x01
+    },
     "Potion": {
         'classification': ItemClassification.useful,
         'id': 0x2f

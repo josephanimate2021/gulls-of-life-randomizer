@@ -10,7 +10,16 @@ class Randomizer {
         for (const SCRIPT_PATH of [
             'modules/BinFile.js',
             'modules/HashCalculator.js',
+            'modules/RomPatcher.format.ips.js',
+            'modules/RomPatcher.format.ups.js',
+            'modules/RomPatcher.format.aps_n64.js',
+            'modules/RomPatcher.format.aps_gba.js',
             'modules/RomPatcher.format.bps.js',
+            'modules/RomPatcher.format.rup.js',
+            'modules/RomPatcher.format.ppf.js',
+            'modules/RomPatcher.format.bdf.js',
+            'modules/RomPatcher.format.pmsr.js',
+            'modules/RomPatcher.format.vcdiff.js',
             'modules/zip.js/zip.min.js',
             'RomPatcher.js'
         ]) {
@@ -196,7 +205,7 @@ class Randomizer {
     changeSettingsSeed() {
         for (const elem of document.getElementById("rando_settings").children) {
             if (!elem.id) continue
-            if (elem.id == "romhack_version") this.rando_settings.locations = {}
+            if (elem.id == "romhack_version" && this.rando_settings[elem.id] != elem.value) this.rando_settings.locations = {}
             switch (elem.getAttribute("type")) {
                 case "checkbox": {
                     this.rando_settings[elem.id] = elem.checked
@@ -306,10 +315,10 @@ class Randomizer {
         if (this.loadingROM) return;
         this.loadingROM = true
         this.rando_status_elem.textContent ||= SBT("Lancement de Plandomizer...", "Opening Plandomizer...")
+        this.plando_modal ||= document.getElementById("plandomizer")
         this.plando_locations = Object.assign({}, this.rando_settings.locations)
         this.plando_config ||= document.getElementById("game_locations_plando")
         if (Object.keys(this.plando_locations).length == 0) await new Promise(async res => {
-            this.plando_config.setAttribute("data-romhackVer", this.rando_settings.romhack_version)
             this.plando_locations = {}
             const locations_data = JSON.parse(await this.pyodide.runPythonAsync(this.pyCode + "\nrando.stringify_locations()"))
             for (const location in locations_data) {
@@ -355,7 +364,6 @@ class Randomizer {
             this.plando_config.appendChild(select)
             this.plando_config.insertAdjacentHTML("beforeend", "<br>")
         }
-        this.plando_modal ||= document.getElementById("plandomizer")
         this.plando_modal.showModal()
         this.rando_status_elem.textContent = ""
         this.loadingROM = false
@@ -364,6 +372,7 @@ class Randomizer {
         for (const elem of this.plando_config.children) {
             if (elem.id) this.rando_settings.locations[elem.id.split("_").join(" ")] = elem.value
         }
+        this.changeSettingsSeed()
     }
     clearPlandoLocations() {
         this.rando_settings.locations = {}
