@@ -5,6 +5,8 @@ from .sym import sym
 from ..data.items import ITEMS_DATA
 from ..data.locations import *
 from ..ap.patching.Util import simple_hex
+from ..ap.patching.z80asm.Assembler import Z80Assembler, Z80Block, GameboyAddress
+from ..ap.patching.z80asm.Util import value_to_byte_array
 
 def apply_bugfixes(rom_data: RomData, parsed_sym: sym) -> None:
     """
@@ -112,3 +114,49 @@ def add_warp_to_start(patch_data: dict, parsed_sym: sym, asm_code: dict):
         "@done:\n"
         f"jp menuStateFadeIntoMenu@openMenu"
     )
+
+def modify_dream_timer(patch_data: dict, parsed_sym: sym, asm_code: dict):
+    # Create variables for the loop.
+    code_array = [
+        "call $0000\n",
+        "call $0010\n",
+        "call $0020\n",
+        "ld hl,$0030\n",
+        "ldi a,(hl)\n",
+        "or (hl)\n",
+        "jr nz,$0050\n",
+    ]
+    code = ""
+    if patch_data["romhack_version"] not in ["1.0_2", "1.0_1.1", "1.0_1"]:
+        code_array[3] = (
+            "ld e,$00\n"
+            "ld a,(de)\n"
+            "cp $02\n"
+            "jr z,$0040\n"
+            f"{code_array[3]}"
+        )
+    for c in code_array:
+        code += c
+    frames = 60 * int(patch_data["dream_timer"])
+    interactionCodee9State0Addr = parsed_sym.find("label", "interactionCodee9@state0")
+    bank = interactionCodee9State0Addr.__str__().split(":")[0]
+    frame_array = [0, 0] if patch_data["disable_dream_timer"] else [
+        simple_hex(0xff), simple_hex(0xff)
+    ] if patch_data["max_out_dream_timer"] else [
+        simple_hex(i) for i in reversed(value_to_byte_array(frames, 2))
+    ]
+
+    # Loop the way to adding code.
+    for i in range(len(frame_array)):
+        # Convert the asm code into bytes with the assembler.
+        fake_assembler = Z80Assembler([0x0], {}, rando.rom)
+        fake_assembler.add_block(Z80Block("00/0000/", code))
+        fake_assembler.compile_all()
+
+        # create variables for modifying the dream timer using the compiled code bytes.
+        addr = GameboyAddress(interactionCodee9State0Addr.bank, interactionCodee9State0Addr.offset + len(fake_assembler.blocks[0].byte_array))
+        offset = addr.__str__().split(":")[1]
+
+        # Modify the asm code before preparing for the next iteration.
+        asm_code[f"{bank}/{offset}/"] = f"ld (hl),${frame_array[i]}"
+        code += asm_code[f"{bank}/{offset}/"] + "\n" + ("dec l\n" if i == 0 else "")

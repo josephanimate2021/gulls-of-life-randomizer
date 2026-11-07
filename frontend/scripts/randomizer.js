@@ -133,15 +133,9 @@ class Randomizer {
                                 let input_first = false
                                 const label_elem = document.createElement("label")
                                 let input_elem = document.createElement("input")
-                                input_elem.setAttribute("onclick", "rando.changeSettingsSeed()")
-                                if (typeof settings[c][o].default == "boolean") {
-                                    input_elem.type = "checkbox"
-                                    input_first = true
-                                    input_elem.defaultChecked = settings[c][o].default
-                                } else if (settings[c][o].options) {
+                                if (settings[c][o].options) {
                                     settings_elem.insertAdjacentHTML("beforeend", "<br>")
                                     input_elem = document.createElement("select")
-                                    input_elem.setAttribute("onchange", "rando.changeSettingsSeed()")
                                     for (const c2 in settings[c][o].options) {
                                         if (typeof settings[c][o].options[c2] == "object" && !Array.isArray(settings[c][o].options[c2])) {
                                             const optgroup = document.createElement("optgroup")
@@ -157,18 +151,36 @@ class Randomizer {
                                             elem.appendChild(option_elem)
                                         }
                                     }
+                                } else switch (typeof settings[c][o].default) {
+                                    case "number": {
+                                        if (settings[c][o].min) input_elem.min = settings[c][o].min
+                                        if (settings[c][o].max) input_elem.max = settings[c][o].max
+                                        input_elem.setAttribute("type", "number")
+                                    } case "string": {
+                                        input_elem.setAttribute("required", "")
+                                        if (typeof settings[c][o].default != "number") input_elem.setAttribute("type", "text")
+                                        input_elem.defaultValue = settings[c][o].default
+                                        break
+                                    } case "boolean": {
+                                        input_elem.type = "checkbox"
+                                        input_first = true
+                                        input_elem.defaultChecked = settings[c][o].default
+                                        break;
+                                    }
                                 }
+                                input_elem.setAttribute("onchange", "rando.changeSettingsSeed()")
                                 input_elem.id = o
                                 input_elem.title = SBT(settings[c][o].description[0], settings[c][o].description[1])
                                 if (settings[c][o].disabled) input_elem.disabled = true
                                 label_elem.setAttribute("for", o)
                                 label_elem.title = input_elem.title
+                                const en_label = o.split("_").map(a => {
+                                    const rest = a.substring(1)
+                                    return a.split(rest)[0].toUpperCase() + rest
+                                }).join(" ")
                                 for (let i = 0; i < 2; i++) {
                                     if (input_first) settings_elem.insertAdjacentHTML("beforeend", `${i == 1 ? ":" : ""} ${input_elem.outerHTML}`);
-                                    else label_elem.textContent = " " + SBT(settings[c][o].fr, o.split("_").map(a => {
-                                        const rest = a.substring(1)
-                                        return a.split(rest)[0].toUpperCase() + rest
-                                    }).join(" ")), settings_elem.appendChild(label_elem)
+                                    else label_elem.textContent = " " + SBT(settings[c][o].fr || en_label, en_label), settings_elem.appendChild(label_elem)
                                     input_first = !input_first
                                 }
                             }
@@ -225,70 +237,76 @@ class Randomizer {
     }
     async generateSeed(btn) {
         if (this.loadingROM) return;
-        this.loadingROM = true
-        this.rando_status_elem = document.getElementById("rando_status_text")
-        this.rando_status_elem.textContent = SBT("Changement d'emplacement...", "Shuffling Locations...")
-        this.pyodide.FS.writeFile("/home/pyodide/rando_settings.py", `import json\ndef get():\n\treturn json.loads('${JSON.stringify(this.rando_settings)}')`)
-        this.pyodide.runPythonAsync(this.pyCode + `\nimport rando_settings\nrando.generate_seed(rando_settings.get())`).then(async patch_data => {
-            this.rando_status_elem.textContent = SBT("Modification de la ROM...", "Patching ROM...")
-            for (const ext of ["bps", "sym", "txt", "json"]) {
-                if (!this.loadingROM) break;
-                const romhack_builds_base = `romhack_builds/${this.rando_settings.romhack_version}`
-                const fetchStats = await fetch(romhack_builds_base + `/ages.${ext}`)
-                if (fetchStats.status == 200 || fetchStats.status == 304) {
-                    if (ext == "bps") {
-                        const patchFile=new BinFile(await fetchStats.bytes());
-                        patchFile.fileName="ages.bps";
-                        const patch=RomPatcher.parsePatchFile(patchFile);
-                        if (patch) try {
-                            this.pyodide.FS.writeFile("romhack.gbc", RomPatcher.applyPatch(this.romFile, patch, {})._u8array);
-                        } catch (e) {
-                            console.error(e.message);
-                            this.rando_status_elem.textContent = SBT("Échec de l'application du patch. Veuillez vérifier la console pour plus de détails.", "Failed to apply patch. Please check the console for more details.");
-                            this.loadingROM = false
+        this.loadingROM = this.rando_settings.dream_timer > 9 ? confirm([
+            "Whoa there, it seems like you have configured your dream timer setting to be above 9 seconds.",
+            "You are getting this confirmation box because the game will not show you your seconds past this point during your dream,",
+            "and it is to make sure that you will remember the change you made to this setting before randomizing the game.\nAre you sure you want to go about this?"
+        ].join(" ")) : true;
+        if (this.loadingROM) {
+            this.rando_status_elem = document.getElementById("rando_status_text")
+            this.rando_status_elem.textContent = SBT("Changement d'emplacement...", "Shuffling Locations...")
+            this.pyodide.FS.writeFile("/home/pyodide/rando_settings.py", `import json\ndef get():\n\treturn json.loads('${JSON.stringify(this.rando_settings)}')`)
+            this.pyodide.runPythonAsync(this.pyCode + `\nimport rando_settings\nrando.generate_seed(rando_settings.get())`).then(async patch_data => {
+                this.rando_status_elem.textContent = SBT("Modification de la ROM...", "Patching ROM...")
+                for (const ext of ["bps", "sym", "txt", "json"]) {
+                    if (!this.loadingROM) break;
+                    const romhack_builds_base = `romhack_builds/${this.rando_settings.romhack_version}`
+                    const fetchStats = await fetch(romhack_builds_base + `/ages.${ext}`)
+                    if (fetchStats.status == 200 || fetchStats.status == 304) {
+                        if (ext == "bps") {
+                            const patchFile=new BinFile(await fetchStats.bytes());
+                            patchFile.fileName="ages.bps";
+                            const patch=RomPatcher.parsePatchFile(patchFile);
+                            if (patch) try {
+                                this.pyodide.FS.writeFile("romhack.gbc", RomPatcher.applyPatch(this.romFile, patch, {})._u8array);
+                            } catch (e) {
+                                console.error(e.message);
+                                this.rando_status_elem.textContent = SBT("Échec de l'application du patch. Veuillez vérifier la console pour plus de détails.", "Failed to apply patch. Please check the console for more details.");
+                                this.loadingROM = false
+                            }
+                            else {
+                                console.error("Invalid patch file was provided.");
+                                this.rando_status_elem.textContent = SBT("Échec de l'application du patch. Veuillez vérifier la console pour plus de détails.", "Failed to apply patch. Please check the console for more details.");
+                                this.loadingROM = false
+                            }
                         }
-                        else {
-                            console.error("Invalid patch file was provided.");
-                            this.rando_status_elem.textContent = SBT("Échec de l'application du patch. Veuillez vérifier la console pour plus de détails.", "Failed to apply patch. Please check the console for more details.");
-                            this.loadingROM = false
+                        else if (ext == "txt") {
+                            const fixes = await fetchStats.text()
+                            this.pyodide.FS.writeFile("romhack_bugfixes.txt", fixes);
+                            this.pyodide.FS.mkdir("/home/pyodide/bugfixes")
+                            for (const line of fixes.split("\n")) {
+                                if (line.trim() == "") continue;
+                                this.pyodide.FS.writeFile(`/home/pyodide/bugfixes/${line.trim()}`, await (await fetch(romhack_builds_base + `/bugfixes/${line.trim()}`)).bytes())
+                            }
                         }
+                        else this.pyodide.FS.writeFile(`romhack.${ext}`, await fetchStats.text());
                     }
-                    else if (ext == "txt") {
-                        const fixes = await fetchStats.text()
-                        this.pyodide.FS.writeFile("romhack_bugfixes.txt", fixes);
-                        this.pyodide.FS.mkdir("/home/pyodide/bugfixes")
-                        for (const line of fixes.split("\n")) {
-                            if (line.trim() == "") continue;
-                            this.pyodide.FS.writeFile(`/home/pyodide/bugfixes/${line.trim()}`, await (await fetch(romhack_builds_base + `/bugfixes/${line.trim()}`)).bytes())
-                        }
-                    }
-                    else this.pyodide.FS.writeFile(`romhack.${ext}`, await fetchStats.text());
                 }
-            }
-            if (this.loadingROM) this.pyodide.runPythonAsync(this.pyCode + `\nimport json\nrando.patch_rom(json.loads('${patch_data}'))`).then(i => {
-                const rom_info = JSON.parse(i)
-                if (rom_info.patched) {
-                    this.showRandoScreen(true)
-                    console.log(patch_data)
-                    document.getElementById("spoilerLogDownload").setAttribute("href", `data:application/json;base64,${btoa(JSON.stringify({
-                        seed: btoa(patch_data),
-                        locations: JSON.parse(patch_data).locations,
-                    }, null, "\t"))}`);
-                    document.getElementById("randoRomDownload").setAttribute("href", `data:application/octet-stream;base64,${this.pyodide.FS.readFile("romhack.gbc").toBase64()}`);
+                if (this.loadingROM) this.pyodide.runPythonAsync(this.pyCode + `\nimport json\nrando.patch_rom(json.loads('${patch_data}'))`).then(i => {
+                    const rom_info = JSON.parse(i)
+                    if (rom_info.patched) {
+                        this.showRandoScreen(true)
+                        document.getElementById("spoilerLogDownload").setAttribute("href", `data:application/json;base64,${btoa(JSON.stringify({
+                            seed: btoa(patch_data),
+                            patch_data: JSON.parse(patch_data),
+                        }, null, "\t"))}`);
+                        document.getElementById("randoRomDownload").setAttribute("href", `data:application/octet-stream;base64,${this.pyodide.FS.readFile("romhack.gbc").toBase64()}`);
+                    }
+                }).catch((error) => {
                     this.loadingROM = false
-                }
+                    console.error("Error patching ROM:", error);
+                    this.rom_stats_elem.textContent = (SBT("Erreur lors de la patching de la ROM. Veuillez vérifier la console pour plus de détails.", "Error patching ROM. Please check the console for more details."));
+                })
             }).catch((error) => {
                 this.loadingROM = false
-                console.error("Error patching ROM:", error);
-                this.rom_stats_elem.textContent = (SBT("Erreur lors de la patching de la ROM. Veuillez vérifier la console pour plus de détails.", "Error patching ROM. Please check the console for more details."));
+                console.error("Error running the randomizer:", error);
+                this.rom_stats_elem.textContent = (SBT("Erreur lors de l'exécution du générateur aléatoire. Veuillez vérifier la console pour plus de détails.", "Error running the randomizer. Please check the console for more details."));
             })
-        }).catch((error) => {
-            this.loadingROM = false
-            console.error("Error running the randomizer:", error);
-            this.rom_stats_elem.textContent = (SBT("Erreur lors de l'exécution du générateur aléatoire. Veuillez vérifier la console pour plus de détails.", "Error running the randomizer. Please check the console for more details."));
-        })
+        }
     }
     showRandoScreen(preOrPost = false) {
+        this.rando_status_elem.textContent = ""
+        this.loadingROM = false
         document.getElementById("prerando").style.display = preOrPost ? "none" : "block";
         document.getElementById("postrando").style.display = preOrPost ? "block" : "none";
     }

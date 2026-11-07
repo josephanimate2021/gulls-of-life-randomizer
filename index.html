@@ -70,7 +70,7 @@
                         ▶ Téléverser la ROM d'Oracle of Ages (version américaine)<small id="rando_version">v0.0.0</small>
                     </a>
                 </div>
-                <div id="rando_settings_change_screen" style="display: none">
+                <form id="rando_settings_change_screen" style="display: none" onsubmit="rando.generateSeed()" action="javascript:;">
                     <h2 data-en="Randomizer Settings">Paramètres du générateur aléatoire</h2>
                     <div class="hearts" aria-hidden="true" id="rando_status_text"></div>
                     <label for="rando_seed" data-en="Seed:">Graine:</label> <input type="text" id="rando_seed" oninput="rando.changeSettingsFromSeed()" style="width: 50%">
@@ -87,9 +87,8 @@
                     })" href="javascript:;" title="Copy Seed">📰</a>
                     <br>
                     <div id="rando_settings"></div>
-                    <a class="play" href="javascript:;" onclick="rando.generateSeed(this)"
-                        data-en="▶ Generate Randomized ROM">▶ Générer la ROM aléatoire</a>
-                </div>
+                    <button type="submit" class="play" data-en="▶ Generate Randomized ROM">▶ Générer la ROM aléatoire</button>
+                </form>
             </div>
             <div class="sun" aria-hidden="true"></div>
         </header>
@@ -99,7 +98,7 @@
         <section id="jouer">
             <div class="wrap two" style="align-items:start">
                 <div>
-                    <h2><small data-en="&lt;a href=&quot;javascript:;&quot; onclick=&quot;rando.switchBackToGenScreen()&quot;&gt;Back To Generation Screen&lt;/a&gt;">
+                    <h2><small data-en="&lt;a href=&quot;javascript:;&quot; onclick=&quot;rando.showRandoScreen()&quot;&gt;Back To Generation Screen&lt;/a&gt;">
                         <a href="javascript:;" onclick="rando.showRandoScreen()">Retour à l'écran « Génération »</a>
                     </small><span data-en="Congratulations! your game has successfully been randomized!">Félicitations! La génération aléatoire de votre jeu s'est déroulée avec succès!</span>
                     </h2>
@@ -121,10 +120,10 @@
                         data-en="▶ Download the randomized ROM&lt;small&gt;romhack.gbc&lt;/small&gt;" download="romhack.gbc">▶
                         Télécharger la ROM aléatoire<small>romhack.gbc</small></a>
                     <a id="spoilerLogDownload" download="spoiler_log.json"
-                        data-en="▶ Download the spoiler log&lt;small&gt;spoiler_log.json&lt;/small&gt;">▶ Télécharger le
-                        journal des spoilers<small>spoiler_log.json</small></a>
-                    <ul class="keys">
-                        <li><b data-en="Select">Select</b><span data-en="the map">la carte</span></li>
+                        data-en="  Download the spoiler log">  Télécharger le
+                        journal des spoilers</a>
+                    <ul class="keys"> <!-- These are button combinations that are either new to the game or should knows for the randomizer. All other button combinations from ages are still present. -->
+                        <li><b data-en="(Select or Start) + B + A">(Select ou Start) + B + A</b><span data-en="warps you back to your starting position">vous ramène à votre position de départ</span></li>
                         <li><b data-en="Hold Select">Select maintenu</b><span
                                 data-en="Marin has something to say">Marine a son mot
                                 à dire</span></li>
