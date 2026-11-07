@@ -9,7 +9,8 @@ ITEMS_DATA = {
     #    },
     "Shield": {
         'classification': ItemClassification.progression,
-        'id': 0x01
+        'id': 0x01,
+        'hidden': True
     },
     "Bombs (10)": {
         'classification': ItemClassification.progression,
@@ -17,11 +18,13 @@ ITEMS_DATA = {
     },
     "Sword": {
         'classification': ItemClassification.progression,
-        'id': 0x05
+        'id': 0x05,
+        'hidden': True
     },
     "Boomerang": {
         'classification': ItemClassification.progression,
-        'id': 0x06
+        'id': 0x06,
+        'subid': 0x04
     },
     "Lantern Of Dreams": {
         'classification': ItemClassification.progression,
@@ -42,7 +45,8 @@ ITEMS_DATA = {
     },
     "Bombchus (10)": {
         'classification': ItemClassification.progression,
-        'id': 0x0d
+        'id': 0x0d,
+        'subid': 0x01
     },
     "Seed Shooter": {
         'classification': ItemClassification.progression,
@@ -50,19 +54,23 @@ ITEMS_DATA = {
     },
     "Shovel": {
         'classification': ItemClassification.progression,
-        'id': 0x15
+        'id': 0x15,
+        'hidden': True
     },
-    "Power Bracelet": {
+    "Power Glove": {
         'classification': ItemClassification.progression,
-        'id': 0x16
+        'id': 0x16,
+        'subid': 0x02
     },
-    "Feather": {
+    "Roc's Cape": {
         'classification': ItemClassification.progression,
-        'id': 0x17
+        'id': 0x17,
+        'subid': 0x03
     },
     "Seed Satchel": {
         'classification': ItemClassification.progression,
-        'id': 0x19
+        'id': 0x19,
+        'hidden': True
     },
     #"Ember Seeds": {
      #   'classification': ItemClassification.progression,
@@ -137,11 +145,13 @@ ITEMS_DATA = {
     "Progressive Flippers": {
         'classification': ItemClassification.progression,
         'id': 0x2e,
-        'subid': 0x01
+        'subid': 0x01,
+        'hidden': True
     },
     "Potion": {
         'classification': ItemClassification.useful,
-        'id': 0x2f
+        'id': 0x2f,
+        'hidden': True
     },
 
     #"Small Key (Maku Path)": {
@@ -389,7 +399,8 @@ ITEMS_DATA = {
     "Gasha Seed": {
         'classification': ItemClassification.filler,
         'id': 0x34,
-        'subid': 0x01
+        'subid': 0x01,
+        'hidden': True
     },
     
     #     "Maku Seed": {
@@ -400,122 +411,151 @@ ITEMS_DATA = {
     # TODO: Trade Items (if any)
     "Poe Clock": {
         'classification': ItemClassification.progression_skip_balancing,
-        'id': 0x3d
+        'id': 0x3d,
+        'hidden': True
     },
     "Stationery": {
         'classification': ItemClassification.progression_skip_balancing,
-        'id': 0x3e
+        'id': 0x3e,
+        'hidden': True
     },
     "Stink Bag": {
         'classification': ItemClassification.progression_skip_balancing,
-        'id': 0x3f
+        'id': 0x3f,
+        'hidden': True
     },
     "Tasty Meat": {
         'classification': ItemClassification.progression_skip_balancing,
-        'id': 0x47
+        'id': 0x47,
+        'hidden': True
     },
     "Doggie Mask": {
         'classification': ItemClassification.progression,
-        'id': 0x56
+        'id': 0x56,
+        'hidden': True
     },
     "Dumbbell": {
         'classification': ItemClassification.progression_skip_balancing,
-        'id': 0x57
+        'id': 0x57,
+        'hidden': True
     },
     "Cheesy Mustache": {
         'classification': ItemClassification.progression_skip_balancing,
-        'id': 0x5f
+        'id': 0x5f,
+        'hidden': True
     },
     "Funny Joke": {
         'classification': ItemClassification.progression_skip_balancing,
-        'id': 0x3c
+        'id': 0x3c,
+        'hidden': True
     },
     "Touching Book": {
         'classification': ItemClassification.progression_skip_balancing,
-        'id': 0x35
+        'id': 0x35,
+        'hidden': True
     },
     "Magic Oar": {
         'classification': ItemClassification.progression_skip_balancing,
-        'id': 0x38
+        'id': 0x38,
+        'hidden': True
     },
     "Sea Ukulele": {
         'classification': ItemClassification.progression_skip_balancing,
-        'id': 0x39
+        'id': 0x39,
+        'hidden': True
     },
     "Broken Sword": {
          'classification': ItemClassification.progression_skip_balancing,
-         'id': 0x3a
+         'id': 0x3a,
+        'hidden': True
     },
 
     # Not sure we will be using these as well.
     "Bomb Flower": {
         'classification': ItemClassification.progression_skip_balancing,
-        'id': 0x49
+        'id': 0x49,
+        'hidden': True
     },
     "Book of Seals": {
         'classification': ItemClassification.progression,
-        'id': 0x55
+        'id': 0x55,
+        'hidden': True
     },
     "Brother Emblem": {
         'classification': ItemClassification.progression,
-        'id': 0x5b
+        'id': 0x5b,
+        'hidden': True
     },
     "Cheval Rope": {
         'classification': ItemClassification.progression,
-        'id': 0x52
+        'id': 0x52,
+        'hidden': True
     },
 
     "Crown Key": {
         'classification': ItemClassification.progression,
-        'id': 0x43
+        'id': 0x43,
+        'hidden': True
     },
     "Fairy Powder": {
         'classification': ItemClassification.progression,
-        'id': 0x51
+        'id': 0x51,
+        'hidden': True
     },
     "Goron Vase": {
         'classification': ItemClassification.progression_skip_balancing,
-        'id': 0x5c
+        'id': 0x5c,
+        'hidden': True
     },
     "Goronade": {
         'classification': ItemClassification.progression_skip_balancing,
-        'id': 0x5d
+        'id': 0x5d,
+        'hidden': True
     },
     "Graveyard Key": {
         'classification': ItemClassification.progression,
         'id': 0x42,
+        'hidden': True
     },
     "Island Chart": {
         'classification': ItemClassification.progression,
-        'id': 0x54
+        'id': 0x54,
+        'hidden': True
     },
     "Lava Juice": {
         'classification': ItemClassification.progression_skip_balancing,
-        'id': 0x5a
+        'id': 0x5a,
+        'hidden': True
     },
     "Letter of Introduction": {
         'classification': ItemClassification.progression_skip_balancing,
-        'id': 0x59
+        'id': 0x59,
+        'hidden': True
     },
     "Library Key": {
         'classification': ItemClassification.progression,
-        'id': 0x46
+        'id': 0x46,
+        'hidden': True
     },
     "Mermaid Key": {
         'classification': ItemClassification.progression,
-        'id': 0x44
+        'id': 0x44,
+        'hidden': True
     },
     "Old Mermaid Key": {
         'classification': ItemClassification.progression,
-        'id': 0x45
+        'id': 0x45,
+        'hidden': True
     },
     "Rock Brisket": {
         'classification': ItemClassification.progression_skip_balancing,
-        'id': 0x5e
+        'id': 0x5e,
+        'hidden': True
     },
     "Scent Seedling": {
         'classification': ItemClassification.progression_skip_balancing,
-        'id': 0x4d
+        'id': 0x4d,
+        'hidden': True
     },
     "Slate": {
         'classification': ItemClassification.progression,
@@ -523,21 +563,23 @@ ITEMS_DATA = {
     },
     "Tokay Eyeball": {
         'classification': ItemClassification.progression,
-        'id': 0x4f
+        'id': 0x4f,
+        'hidden': True
     },
     "Cracked Tuni Nut": {
         'classification': ItemClassification.progression_skip_balancing,
         'id': 0x4c,
-        'subid': 0x00
+        'hidden': True
     },
     "Tuni Nut": {
         'classification': ItemClassification.progression,
         'id': 0x3b,
-        'subid': 0x00
+        'hidden': True
     },
     "Zora Scale": {
         'classification': ItemClassification.progression,
-        'id': 0x4e
+        'id': 0x4e,
+        'hidden': True
     },
     #   "Bomb Upgrade": {
     #   'classification': ItemClassification.progression,
