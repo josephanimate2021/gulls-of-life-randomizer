@@ -94,11 +94,12 @@ class Randomizer():
         assembler = Z80Assembler(bank_caves, DEFINES, rom)
 
         # Call all functions for rom patching.
-        apply_bugfixes(rom_data, parsed_sym)
         apply_randomized_locations(rom_data, patch_data, settings_copy, parsed_sym)
-        remove_unneccessary_cutscenes(rom_data, parsed_sym, patch_data)
-        add_warp_to_start(patch_data, parsed_sym, asm_code)
-        modify_dream_timer(patch_data, parsed_sym, asm_code)
+        if not patch_data["vanilaize_rom"]:
+            apply_bugfixes(rom_data, parsed_sym)
+            remove_unneccessary_cutscenes(rom_data, parsed_sym, patch_data)
+            add_warp_to_start(parsed_sym, asm_code)
+            modify_dream_timer(patch_data, parsed_sym, asm_code)
 
         # Compile ASM code.
         print(f"Compiling ASM files...")

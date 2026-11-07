@@ -272,6 +272,7 @@ class Randomizer {
                             }
                         }
                         else if (ext == "txt") {
+                            if (this.rando_settings.vanilaize_rom) continue
                             const fixes = await fetchStats.text()
                             this.pyodide.FS.writeFile("romhack_bugfixes.txt", fixes);
                             this.pyodide.FS.mkdir("/home/pyodide/bugfixes")
@@ -291,7 +292,10 @@ class Randomizer {
                             seed: btoa(patch_data),
                             patch_data: JSON.parse(patch_data),
                         }, null, "\t"))}`);
-                        document.getElementById("randoRomDownload").setAttribute("href", `data:application/octet-stream;base64,${this.pyodide.FS.readFile("romhack.gbc").toBase64()}`);
+                        const romhackFile = new BinFile(this.pyodide.FS.readFile("romhack.gbc"))
+                        const patch = RomPatcher.createPatch(this.romFile, romhackFile, "bps", {})
+                        document.getElementById("randoRomDownload").setAttribute("href", `data:application/octet-stream;base64,${romhackFile._u8array.toBase64()}`);
+                        document.getElementById("patchFileDownload").setAttribute("href", `data:application/octet-stream;base64,${patch.export('my_patch')._u8array.toBase64()}`);
                     }
                 }).catch((error) => {
                     this.loadingROM = false

@@ -64,6 +64,11 @@ SETTINGS = {
             "description": ["Lorsque cette fonctionnalité est activée, vous découvrirez des cinématiques mettant en scène Marin la mouette et d'autres personnages au sein de l'objet d'interaction « Ballade ». Par défaut, cette fonctionnalité est désactivée, car son implémentation dans un contexte aléatoire n'a pas de sens. N'activez cette fonctionnalité que si c'est la première fois que vous jouez à « Gulls of Life ».", "When enabled, you will be greeted with cutscenes from marin the seagull and others within the ballade interaction object. By default, this feature is disabled because it dosen't make sense to have that implemented in rando context. Only enable this feature if this is your first time playing gulls of life."],
             "fr": "Afficher les cinématiques de Ballade"
         },
+        "vanilaize_rom": {
+            "default": False,
+            "description": ["Lorsque cette option est activée, toutes les corrections de bugs identifiées pour la version romhack seront supprimées, y compris le « warp to start » ! Assurez-vous d'être certain de votre choix avant de sélectionner cette option, car vous risquez davantage de vous retrouver bloqué définitivement dans le jeu si vous choisissez ce paramètre.", "When enabled, any bugfixes found for the romhack version will be removed, including warp to start! please be certain before selecting this option as you'll have more chance of being softlocked into the game entirely if you select this setting."],
+            "fr": "ROM Vanilaize"
+        },
         "romhack_version": {
             "default": "latest",
             "description": ["Version du romhack « Gulls of Life » utilisée lors de la randomisation du jeu. Veuillez noter que les corrections de bugs seront intégrées le cas échéant ; la version du romhack n'est donc peut-être pas tout à fait originale, mais elle s'en rapproche suffisamment.", "Version of the gulls of life romhack used during game randomization. Please keep in mind that bugfixes will be included if there are any, so the romhack version may not be completely original, but close enough."],

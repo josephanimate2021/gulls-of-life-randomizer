@@ -76,7 +76,7 @@ def remove_unneccessary_cutscenes(rom_data: RomData, parsed_sym: sym, patch_data
         if l is not None: # Place all INTERAC_97 interactions in the same group.
             rom_data.write_bytes(l.address_in_rom() + n, [0x97, 0x67, 0xff, 0xff])
 
-def add_warp_to_start(patch_data: dict, parsed_sym: sym, asm_code: dict):
+def add_warp_to_start(parsed_sym: sym, asm_code: dict):
     menuFadeAddr = parsed_sym.find("label", "menuStateFadeIntoMenu")
     bank, offset = menuFadeAddr.__str__().split(":")
     offsetAsInt = int(f"0x{offset}", 0)
