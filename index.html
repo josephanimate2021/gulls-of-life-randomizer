@@ -28,6 +28,20 @@
         </nav>
 
         <header id="prerando">
+            <dialog id="plandomizer">
+                <h1 data-en="Plandomize Locations">Localisations Plandomize</h1>
+                <p class="hearts" data-en="This dialog window allows you to manually layout your locations according to your decision that you make.
+                    Good Luck and make sure that you're not putting yourself in a softlock situation, because &lt;b&gt;absolutely no logic will be used to fix your issues during randomization!&lt;/b&gt;">
+                    Cette fenêtre de dialogue vous permet de disposer manuellement vos emplacements en fonction des choix que vous effectuez.
+                    Bonne chance, et veillez à ne pas vous mettre dans une situation de « softlock », car <b>aucune logique ne sera utilisée pour résoudre vos problèmes lors de la randomisation !</b>
+                </p>
+                <br>
+                <div id="game_locations_plando"></div>
+                <br>
+                <button onclick="rando.shufflePlandoLocations()" data-en="Shuffle Planned Locations">Lecture aléatoire les lieux prévus</button>
+                <button onclick="rando.clearPlandoLocations()" data-en="Clear Planned Locations">Effacer les lieux prévus</button>
+                <button onclick="rando.closePlando()" data-en="Close Plandomizer">Fermer Plandomizer</button>
+            </dialog>
             <span class="cloud c1"></span><span class="cloud c2"></span><span class="cloud c3"></span>
             <div class="gull" aria-hidden="true">
                 <svg viewBox="0 0 16 10" shape-rendering="crispEdges">
@@ -86,6 +100,7 @@
                         alert(SBT('Échec de la copie de la graine', 'Failed to copy seed'))
                     })" href="javascript:;" title="Copy Seed">📰</a>
                     <br>
+                    <button onclick="rando.newPlandoSession()">Open Plandomizer</button>
                     <div id="rando_settings"></div>
                     <button type="submit" class="play" data-en="▶ Generate Randomized ROM">▶ Générer la ROM aléatoire</button>
                 </form>

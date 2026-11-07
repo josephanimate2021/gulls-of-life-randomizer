@@ -11,5 +11,14 @@ ROM_HASH = "c4639cc61c049e5a085526bb6cac03bb"
 DUNGEON_NAMES = [
     "",
     "Dark Lighthouse",
-    "Toy Chest"
+    "Toy Chest",
+    "Murmuring Reef",
+    "Sleeping Forge",
+    "Echo Cathedral",
+    "Sky Spiral",
+    "Frost Palace",
+    "Sleepless Tower",
+    "",
+    "",
+    "The Snakes' Burrow"
 ]

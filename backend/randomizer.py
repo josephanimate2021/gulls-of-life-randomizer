@@ -129,4 +129,10 @@ class Randomizer():
         rom_hash = hashlib.md5(self.rom).hexdigest()
         return rom_hash == ROM_HASH
 
+    def stringify_locations(self):
+        return json.dumps(locations_data)
+
+    def stringify_items(self):
+        return json.dumps(ITEMS_DATA)
+
 rando = Randomizer()

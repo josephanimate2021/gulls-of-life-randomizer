@@ -1,6 +1,7 @@
 class Randomizer {
     constructor() {
         this.rom_stats_elem = document.getElementById("rom_status_text");
+        this.rando_status_elem = document.getElementById("rando_status_text")
         this.loadingROM = false
         this.pyCode = null;
         this.rando_settings = {
@@ -9,16 +10,7 @@ class Randomizer {
         for (const SCRIPT_PATH of [
             'modules/BinFile.js',
             'modules/HashCalculator.js',
-            'modules/RomPatcher.format.ips.js',
-            'modules/RomPatcher.format.ups.js',
-            'modules/RomPatcher.format.aps_n64.js',
-            'modules/RomPatcher.format.aps_gba.js',
             'modules/RomPatcher.format.bps.js',
-            'modules/RomPatcher.format.rup.js',
-            'modules/RomPatcher.format.ppf.js',
-            'modules/RomPatcher.format.bdf.js',
-            'modules/RomPatcher.format.pmsr.js',
-            'modules/RomPatcher.format.vcdiff.js',
             'modules/zip.js/zip.min.js',
             'RomPatcher.js'
         ]) {
@@ -204,6 +196,7 @@ class Randomizer {
     changeSettingsSeed() {
         for (const elem of document.getElementById("rando_settings").children) {
             if (!elem.id) continue
+            if (elem.id == "romhack_version") this.rando_settings.locations = {}
             switch (elem.getAttribute("type")) {
                 case "checkbox": {
                     this.rando_settings[elem.id] = elem.checked
@@ -235,7 +228,7 @@ class Randomizer {
             this.changeSettingsSeed()
         }
     }
-    async generateSeed(btn) {
+    async generateSeed() {
         if (this.loadingROM) return;
         this.loadingROM = this.rando_settings.dream_timer > 9 ? confirm([
             "Whoa there, it seems like you have configured your dream timer setting to be above 9 seconds.",
@@ -243,7 +236,6 @@ class Randomizer {
             "and it is to make sure that you will remember the change you made to this setting before randomizing the game.\nAre you sure you want to go about this?"
         ].join(" ")) : true;
         if (this.loadingROM) {
-            this.rando_status_elem = document.getElementById("rando_status_text")
             this.rando_status_elem.textContent = SBT("Changement d'emplacement...", "Shuffling Locations...")
             this.pyodide.FS.writeFile("/home/pyodide/rando_settings.py", `import json\ndef get():\n\treturn json.loads('${JSON.stringify(this.rando_settings)}')`)
             this.pyodide.runPythonAsync(this.pyCode + `\nimport rando_settings\nrando.generate_seed(rando_settings.get())`).then(async patch_data => {
@@ -309,6 +301,105 @@ class Randomizer {
         this.loadingROM = false
         document.getElementById("prerando").style.display = preOrPost ? "none" : "block";
         document.getElementById("postrando").style.display = preOrPost ? "block" : "none";
+    }
+    async newPlandoSession() {
+        if (this.loadingROM) return;
+        this.loadingROM = true
+        this.rando_status_elem.textContent ||= SBT("Lancement de Plandomizer...", "Opening Plandomizer...")
+        this.plando_locations = Object.assign({}, this.rando_settings.locations)
+        this.plando_config ||= document.getElementById("game_locations_plando")
+        if (Object.keys(this.plando_locations).length == 0) await new Promise(async res => {
+            this.plando_config.setAttribute("data-romhackVer", this.rando_settings.romhack_version)
+            this.plando_locations = {}
+            const locations_data = JSON.parse(await this.pyodide.runPythonAsync(this.pyCode + "\nrando.stringify_locations()"))
+            for (const location in locations_data) {
+                if (
+                    (
+                        locations_data[location]?.not_compatiable_versions 
+                        && locations_data[location].not_compatiable_versions.includes(this.rando_settings.romhack_version)
+                    ) || (
+                        locations_data[location]?.compatiable_versions 
+                        && !locations_data[location].compatiable_versions.includes(this.rando_settings.romhack_version)
+                    )
+                ) continue
+                this.plando_locations[location] = locations_data[location]
+            }
+            res()
+        });
+        else {
+            const new_locations = {}
+            for (const location in this.plando_locations) {
+                new_locations[location] = {"vanila_item": this.plando_locations[location]}
+            }
+            this.plando_locations = new_locations
+        }
+        this.plando_config.innerHTML = ""
+        const game_items = JSON.parse(await this.pyodide.runPythonAsync(this.pyCode + "\nrando.stringify_items()"))
+        for (const location in this.plando_locations) {
+            const label = document.createElement("label")
+            label.textContent = location + ": "
+            label.classList.add("hearts")
+            label.for = location.split(" ").join("_")
+            this.plando_config.appendChild(label)
+            const select = document.createElement("select")
+            select.id = label.for
+            select.setAttribute("onchange", "rando.savePlandoLocation()")
+            for (const item in game_items) {
+                if (game_items[item].hidden) continue
+                const option = document.createElement("option")
+                option.value = item
+                if (item == this.plando_locations[location].vanila_item) option.setAttribute("selected", "");
+                option.textContent = item
+                select.appendChild(option)
+            }
+            this.plando_config.appendChild(select)
+            this.plando_config.insertAdjacentHTML("beforeend", "<br>")
+        }
+        this.plando_modal ||= document.getElementById("plandomizer")
+        this.plando_modal.showModal()
+        this.rando_status_elem.textContent = ""
+        this.loadingROM = false
+    }
+    savePlandoLocation() {
+        for (const elem of this.plando_config.children) {
+            if (elem.id) this.rando_settings.locations[elem.id.split("_").join(" ")] = elem.value
+        }
+    }
+    clearPlandoLocations() {
+        this.rando_settings.locations = {}
+        this.closePlando()
+        this.rando_status_elem.textContent = SBT("Nettoyage des emplacements planifiés...", "Clearing Plandomized Locations...")
+        this.newPlandoSession()
+        const i = setInterval(() => {
+            if (!this.loadingROM) {
+                clearInterval(i)
+                alert(SBT('Les emplacements Plando ont été effacés avec succès !', 'Plando Locations were cleared successfully!')) 
+            }
+        })
+    }
+    closePlando() {
+        this.plando_modal.close()
+    }
+    shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+    shufflePlandoLocations() {
+        let array = []
+        for (const elem of this.plando_config.children) {
+            if (!elem.id) continue
+            array.push(elem.value)
+        }
+        array = this.shuffleArray(array)
+        let count = 0
+        for (const elem of this.plando_config.children) {
+            if (!elem.id) continue
+            elem.value = array[count]
+            count++
+        }
     }
 }
 
