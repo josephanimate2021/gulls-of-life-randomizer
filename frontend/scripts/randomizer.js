@@ -289,7 +289,9 @@ class Randomizer {
                         else this.pyodide.FS.writeFile(`/home/pyodide/romhack.${ext}`, await fetchStats.text());
                     }
                 }
-                if (this.loadingROM) this.pyodide.runPythonAsync(this.pyCode + `\nimport json\nrando.patch_rom(json.loads('${patch_data}'))`).then(i => {
+                if (this.loadingROM) this.pyodide.runPythonAsync(this.pyCode + `\nimport json\nrando.patch_rom(json.loads('${JSON.stringify(Object.assign(JSON.parse(patch_data), {
+                    "apply_fr_lang": this.lang_index == 0
+                }))}'))`).then(i => {
                     const rom_info = JSON.parse(i)
                     if (rom_info.patched) {
                         this.showRandoScreen(true)

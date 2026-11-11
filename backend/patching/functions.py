@@ -18,6 +18,19 @@ def apply_bugfixes(rom_data: RomData, parsed_sym: sym) -> None:
             if l is not None:
                 rom_data.write_bytes(l.address_in_rom(), open(f"bugfixes/{line.strip()}", "rb").read())
 
+def change_language_to_french(parsed_sym: sym, asm_code: dict):
+    addr = parsed_sym.find("label", "saveFile")
+    addr1 = parsed_sym.find("label", "initializeChildOnGameStart").__str__().split(":")[1]
+    intFile_addr = GameboyAddress(addr.bank, addr.offset - 0x10)
+    bank, offset = intFile_addr.__str__().split(":")
+    asm_code[f"{bank}/{offset}/"] = "call changeLangToFrench"
+    asm_code[f"{bank}//changeLangToFrench"] = (
+        "ld a,$01\n"
+        "ld (wActiveLanguage),a\n"
+        f"ld hl,${addr1}\n"
+        "ret"
+    )
+    
 # helper function that adds param2 to i unless stopped by my base case, which is helpful for finding the right rom address for a certain param in a table despite changes in the disasm code.
 def find_address_for_param_helper(lineNumber, param, param2 = 4, i=0,c=0) -> int:
     return i - param if c == lineNumber else find_address_for_param_helper(lineNumber, param, param2, i + param2, c + 1)
