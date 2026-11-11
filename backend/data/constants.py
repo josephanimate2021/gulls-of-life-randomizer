@@ -22,3 +22,15 @@ DUNGEON_NAMES = [
     "",
     "The Snakes' Burrow"
 ]
+
+DUNGEON_ITEM_NAMES = []
+for d in DUNGEON_NAMES:
+    if d == "":
+        continue
+    DUNGEON_ITEM_NAMES.extend([
+        f"Dungeon Map ({d})",
+        f"Compass ({d})",
+        f"Small Key ({d})",
+        f"Master Key ({d})",
+        f"Boss Key ({d})"
+    ])

@@ -118,27 +118,27 @@ ITEMS_DATA = {
         'subid': 0x04
     },
     "Rupees (50)": {
-        'classification': ItemClassification.progression_skip_balancing,
+        'classification': ItemClassification.filler,
         'id': 0x28,
         'subid': 0x05
     },
     "Rupees (100)": {
-        'classification': ItemClassification.progression_skip_balancing,
+        'classification': ItemClassification.filler,
         'id': 0x28,
         'subid': 0x06
     },
     "Rupees (200)": {
-        'classification': ItemClassification.progression_skip_balancing,
+        'classification': ItemClassification.filler,
         'id': 0x28,
         'subid': 0x08
     },
     "Heart Container": {
-        'classification': ItemClassification.useful,
+        'classification': ItemClassification.filler,
         'id': 0x2a,
         'subid': 0x01
     },
     "Piece of Heart": {
-        'classification': ItemClassification.useful,
+        'classification': ItemClassification.filler,
         'id': 0x2b,
         'subid': 0x01
     },
@@ -149,7 +149,7 @@ ITEMS_DATA = {
         'hidden': True
     },
     "Potion": {
-        'classification': ItemClassification.useful,
+        'classification': ItemClassification.filler,
         'id': 0x2f,
         'hidden': True
     },
@@ -313,85 +313,85 @@ ITEMS_DATA = {
         'hidden': True
     },
     "Compass (Dark Lighthouse)": {
-        'classification': ItemClassification.useful,
+        'classification': ItemClassification.filler,
         'id': 0x32,
         'subid': 0x01
     },
     "Compass (Toy Chest)": {
-        'classification': ItemClassification.useful,
+        'classification': ItemClassification.filler,
         'id': 0x32,
         'subid': 0x02
     },
     "Compass (Murmuring Reef)": {
-        'classification': ItemClassification.useful,
+        'classification': ItemClassification.filler,
         'id': 0x32,
         'subid': 0x03,
         'hidden': True
     },
     "Compass (Sleeping Forge)": {
-        'classification': ItemClassification.useful,
+        'classification': ItemClassification.filler,
         'id': 0x32,
         'subid': 0x04
     },
     "Compass (Echo Cathedral)": {
-        'classification': ItemClassification.useful,
+        'classification': ItemClassification.filler,
         'id': 0x32,
         'subid': 0x05,
         'hidden': True
     },
     "Compass (Sky Spiral)": {
-        'classification': ItemClassification.useful,
+        'classification': ItemClassification.filler,
         'id': 0x32,
         'subid': 0x06,
         'hidden': True
     },
     "Compass (Frost Palace)": {
-        'classification': ItemClassification.useful,
+        'classification': ItemClassification.filler,
         'id': 0x32,
         'subid': 0x07
     },
     "Compass (Sleepless Tower)": {
-        'classification': ItemClassification.useful,
+        'classification': ItemClassification.filler,
         'id': 0x32,
         'subid': 0x08
     },
     "Dungeon Map (Dark Lighthouse)": {
-        'classification': ItemClassification.useful,
+        'classification': ItemClassification.filler,
         'id': 0x33,
         'subid': 0x01
     },
     "Dungeon Map (Toy Chest)": {
-        'classification': ItemClassification.useful,
+        'classification': ItemClassification.filler,
         'id': 0x33,
         'subid': 0x02
     },
     "Dungeon Map (Murmuring Reef)": {
-        'classification': ItemClassification.useful,
+        'classification': ItemClassification.filler,
         'id': 0x33,
         'subid': 0x03
     },
     "Dungeon Map (Sleeping Forge)": {
-        'classification': ItemClassification.useful,
+        'classification': ItemClassification.filler,
         'id': 0x33,
         'subid': 0x04
     },
     "Dungeon Map (Echo Cathedral)": {
-        'classification': ItemClassification.useful,
+        'classification': ItemClassification.filler,
         'id': 0x33,
         'subid': 0x05
     },
     "Dungeon Map (Sky Spiral)": {
-        'classification': ItemClassification.useful,
+        'classification': ItemClassification.filler,
         'id': 0x33,
         'subid': 0x06
     },
     "Dungeon Map (Frost Palace)": {
-        'classification': ItemClassification.useful,
+        'classification': ItemClassification.filler,
         'id': 0x33,
         'subid': 0x07
     },
     "Dungeon Map (Sleepless Tower)": {
-        'classification': ItemClassification.useful,
+        'classification': ItemClassification.filler,
         'id': 0x33,
         'subid': 0x08
     },

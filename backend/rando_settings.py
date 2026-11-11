@@ -33,6 +33,7 @@ SETTINGS = {
         },
         "guarentee_sword": {
             "default": True,
+            "disabled": True,
             "description": ["Lorsque cette option est activée, un ouvrier portant un casque de chantier sur l'île de Mist aura toujours une épée sur lui, quelles que soient les conditions logiques.", "When enabled, a hardhat worker on mist island will always have a sword on him, no matter the logic conditions."],
             "fr": "Assurer une épée"
         },
@@ -41,7 +42,7 @@ SETTINGS = {
             "options": {
                 "none": ["Aucune logique", "No Logic"],
                 "casual": ["Logique de base", "Basic Logic"],
-                "medium_logic": ["Logique complète", "Full Logic"]
+                "medium_logic": ["Logique moyenne", "Medium Logic"]
             },
             "description": ["À utiliser lorsque vous vous déplacez d'un endroit à l'autre dans le jeu.\n\nAucune logique : aucun « softlock » n'est pris en compte lors de la génération aléatoire d'une partie.\n\nLogique de base : vous êtes censé connaître l'itinéraire que vous avez emprunté spontanément lors de votre précédente partie du romhack. Aucune astuce n'est requise.\n\nLogique moyenne : vous êtes censé connaître le fonctionnement du moteur Oracle, ce qui implique de connaître les astuces du jeu. Aucun bug n'est requis.", "Used when shuffling around locations in the game.\n\nNo Logic: no softlocks are put into mind when randomizing a game.\n\nBasic Logic: You are expected to know the route you took casually in the romhack before. No tricks will be required.\n\nMedium Logic: You are expected to know how the oracles engine works, that means knowing tricks ingame. No glitches are required."],
             "fr": "Logique"

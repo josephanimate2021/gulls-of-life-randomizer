@@ -16,14 +16,6 @@ locations_data = {
         "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
         "dungeon": 1
     },
-    "Dark Lighthouse: Chest With Lever": {
-        "vanila_item": "Rupees (50)",
-        "requirements": None,
-        "not_compatiable_versions": ["1.0_1"],
-        "room": 0x041D,
-        "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
-        "dungeon": 1
-    },
     "Dark Lighthouse: Chest With Pots And a Zol": {
         "vanila_item": "Small Key (Dark Lighthouse)",
         "requirements": None,
@@ -44,6 +36,18 @@ locations_data = {
         "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
         "dungeon": 1
     },
+    "Dark Lighthouse: Chest With Lever": {
+        "vanila_item": "Rupees (50)",
+        "requirements": {
+            "all": [
+                ("Lantern Of Dreams", 1)
+            ]
+        },
+        "not_compatiable_versions": ["1.0_1"],
+        "room": 0x041D,
+        "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
+        "dungeon": 1
+    },
      "Dark Lighthouse: Chest Across Holes": {
         "vanila_item": "Small Key (Dark Lighthouse)",
         "requirements": None,
@@ -56,7 +60,7 @@ locations_data = {
         "vanila_item": "Lantern Of Dreams",
         "requirements": {
             "any": [
-                has_first_version(),
+                ("conditional", has_first_version()),
                 has_small_keys(1, 1)
             ]
         }, # If we don't require one small key here, we will encounter a softlock because the creator chose to place a keydoor in a room where you can access it after going through other rooms.
@@ -69,7 +73,6 @@ locations_data = {
         "requirements": {
             "all": [
                 has_small_keys(1, 2), # Keeping this in despite the oldest version being present to prevent softlocks.
-                ("Lantern Of Dreams", 1)
             ]
         },
         "room": 0x0417,

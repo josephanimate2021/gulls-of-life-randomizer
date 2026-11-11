@@ -246,20 +246,24 @@ class Randomizer {
         ].join(" ")) : true;
         if (this.loadingROM) {
             this.rando_status_elem.textContent = SBT("Changement d'emplacement...", "Shuffling Locations...")
-            this.pyodide.FS.writeFile("/home/pyodide/rando_settings.py", `import json\ndef get():\n\treturn json.loads('${JSON.stringify(this.rando_settings)}')`)
+            if (!this.fileExists("/home/pyodide/rando_settings.py")) this.pyodide.FS.writeFile(
+                "/home/pyodide/rando_settings.py", `import json\ndef get():\n\treturn json.loads('${JSON.stringify(this.rando_settings)}')`
+            )
             this.pyodide.runPythonAsync(this.pyCode + `\nimport rando_settings\nrando.generate_seed(rando_settings.get())`).then(async patch_data => {
                 this.rando_status_elem.textContent = SBT("Modification de la ROM...", "Patching ROM...")
                 for (const ext of ["bps", "sym", "txt", "json"]) {
                     if (!this.loadingROM) break;
+                    if (this.fileExists(`/home/pyodide/romhack.${ext}`)) continue
                     const romhack_builds_base = `romhack_builds/${this.rando_settings.romhack_version}`
                     const fetchStats = await fetch(romhack_builds_base + `/ages.${ext}`)
                     if (fetchStats.status == 200 || fetchStats.status == 304) {
                         if (ext == "bps") {
+                            if (this.fileExists("/home/pyodide/romhack.gbc")) continue
                             const patchFile=new BinFile(await fetchStats.bytes());
                             patchFile.fileName="ages.bps";
                             const patch=RomPatcher.parsePatchFile(patchFile);
                             if (patch) try {
-                                this.pyodide.FS.writeFile("romhack.gbc", RomPatcher.applyPatch(this.romFile, patch, {})._u8array);
+                                this.pyodide.FS.writeFile("/home/pyodide/romhack.gbc", RomPatcher.applyPatch(this.romFile, patch, {})._u8array);
                             } catch (e) {
                                 console.error(e.message);
                                 this.rando_status_elem.textContent = SBT("Échec de l'application du patch. Veuillez vérifier la console pour plus de détails.", "Failed to apply patch. Please check the console for more details.");
@@ -272,16 +276,17 @@ class Randomizer {
                             }
                         }
                         else if (ext == "txt") {
-                            if (this.rando_settings.vanilaize_rom) continue
+                            if (this.rando_settings.vanilaize_rom || this.fileExists("/home/pyodide/romhack_bugfixes.txt")) continue
+                            const bgp = "/home/pyodide/bugfixes";
                             const fixes = await fetchStats.text()
-                            this.pyodide.FS.writeFile("romhack_bugfixes.txt", fixes);
-                            this.pyodide.FS.mkdir("/home/pyodide/bugfixes")
+                            this.pyodide.FS.writeFile("/home/pyodide/romhack_bugfixes.txt", fixes);
+                            this.pyodide.FS.mkdir(bgp)
                             for (const line of fixes.split("\n")) {
                                 if (line.trim() == "") continue;
-                                this.pyodide.FS.writeFile(`/home/pyodide/bugfixes/${line.trim()}`, await (await fetch(romhack_builds_base + `/bugfixes/${line.trim()}`)).bytes())
+                                this.pyodide.FS.writeFile(`${bgp}/${line.trim()}`, await (await fetch(romhack_builds_base + `/bugfixes/${line.trim()}`)).bytes())
                             }
                         }
-                        else this.pyodide.FS.writeFile(`romhack.${ext}`, await fetchStats.text());
+                        else this.pyodide.FS.writeFile(`/home/pyodide/romhack.${ext}`, await fetchStats.text());
                     }
                 }
                 if (this.loadingROM) this.pyodide.runPythonAsync(this.pyCode + `\nimport json\nrando.patch_rom(json.loads('${patch_data}'))`).then(i => {
@@ -300,13 +305,21 @@ class Randomizer {
                 }).catch((error) => {
                     this.loadingROM = false
                     console.error("Error patching ROM:", error);
-                    this.rom_stats_elem.textContent = (SBT("Erreur lors de la patching de la ROM. Veuillez vérifier la console pour plus de détails.", "Error patching ROM. Please check the console for more details."));
+                    this.rando_status_elem.textContent = (SBT("Erreur lors de la patching de la ROM. Veuillez vérifier la console pour plus de détails.", "Error patching ROM. Please check the console for more details."));
                 })
             }).catch((error) => {
                 this.loadingROM = false
                 console.error("Error running the randomizer:", error);
-                this.rom_stats_elem.textContent = (SBT("Erreur lors de l'exécution du générateur aléatoire. Veuillez vérifier la console pour plus de détails.", "Error running the randomizer. Please check the console for more details."));
+                this.rando_status_elem.textContent = (SBT("Erreur lors de l'exécution du générateur aléatoire. Veuillez vérifier la console pour plus de détails.", "Error running the randomizer. Please check the console for more details."));
             })
+        }
+    }
+    fileExists(path) {
+        try {
+            this.pyodide.FS.stat(path)
+            return true
+        } catch {
+            return false
         }
     }
     showRandoScreen(preOrPost = false) {
