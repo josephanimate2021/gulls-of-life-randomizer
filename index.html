@@ -42,6 +42,35 @@
                 <button onclick="rando.clearPlandoLocations()" data-en="Clear Planned Locations">Effacer les lieux prévus</button>
                 <button onclick="rando.closePlando()" data-en="Close Plandomizer">Fermer Plandomizer</button>
             </dialog>
+            <dialog id="preset_save_dialog">
+                <h1 data-en="Save Your Preset">Enregistrer votre préréglage</h1>
+                <h2 id="preset_save_status"></h2>
+                <form id="preset_save_config" onsubmit="rando.savePreset(this)" action="javascript:;">
+                    <label for="preset_title" class="hearts" data-en="Preset Title">Titre du préréglage</label><br>
+                    <input type="text" id="preset_title" placeholder="My First Preset" required><br>
+                    <label for="preset_description" class="hearts" data-en="Preset Description">Description du préréglage</label><br>
+                    <textarea id="preset_description" placeholder="This is a preset I made for my audience to see." style="width: 376px; height: 154px;"></textarea><br>
+                    <label for="preset_creators" class="hearts" data-en="Preset Creator(s)">Créateur(s) du préréglage</label><br>
+                    <textarea id="preset_creators" placeholder="John Doe" required style="width: 376px; height: 154px;"></textarea><br>
+                    <button type="submit"data-en="Save Preset">Enregistrer le préréglage</button>
+                </form>
+                <button onclick="document.getElementById('preset_save_dialog').close()" data-en="Close Modal">Fermer la fenêtre modale</button>
+            </dialog>
+            <dialog id="preset_upload_instructions">
+                <h2>Uploading A Preset to this website</h2>
+                <button onclick="document.getElementById('preset_upload_instructions').close()" data-en="Close Modal">Fermer la fenêtre modale</button>
+            </dialog>
+            <dialog id="preset_manager">
+                <h1 data-en="Preset Manager">Gestionnaire de préréglages</h1>
+                <h2>
+                    <span data-en="Loaded Preset: ">Préréglage chargé: </span>
+                    <span id="loadedPreset">Default</span>
+                </h2><br>
+                <button onclick="document.getElementById('preset_upload_instructions').showModal()" data-en="Upload Preset">Importer un préréglage</button>
+                <button onclick="rando.deletePreset()" data-en="Delete Preset">Supprimer le préréglage</button>
+                <br>
+                <button onclick="document.getElementById('preset_manager').close()" data-en="Close Modal">Fermer la fenêtre modale</button>
+            </dialog>
             <span class="cloud c1"></span><span class="cloud c2"></span><span class="cloud c3"></span>
             <div class="gull" aria-hidden="true">
                 <svg viewBox="0 0 16 10" shape-rendering="crispEdges">
@@ -100,7 +129,14 @@
                         alert(SBT('Échec de la copie de la graine', 'Failed to copy seed'))
                     })" href="javascript:;" title="Copy Seed">📰</a>
                     <br>
-                    <button onclick="rando.newPlandoSession()" data-en="Open Plandomizer">Ouvrir Plandomizer</button>
+                    <div id="rando_options">
+                        <button onclick="rando.newPlandoSession()" data-en="Open Plandomizer">Ouvrir Plandomizer</button>
+                        <label for="rando_presets" data-en="Setting Preset:">Réglage préréglé:</label>
+                        <select id="rando_presets" onchange="rando.changePreset(this.value)"></select>
+                        <a href="javascript:;" onclick="rando.deleteAllPresets()" data-en="Delete All Presets" id="del_all_presets_btn">Supprimer tous les préréglages</a>
+                        <a href="javascript:;" onclick="document.getElementById('preset_save_dialog').showModal()" id="preset_save_btn" style="display: none;" data-en="Save Preset">Enregistrer le préréglage</a>
+                        <a href="javascript:;" onclick="document.getElementById('preset_manager').showModal()" id="preset_mgr_btn" data-en="Preset Manager">Gestionnaire de préréglages</a>
+                    </div>
                     <div id="rando_settings"></div>
                     <button type="submit" class="play" data-en="▶ Generate Randomized ROM">▶ Générer la ROM aléatoire</button>
                 </form>

@@ -7,6 +7,7 @@ class Randomizer {
         this.rando_settings = {
             locations: {}
         }
+        this.initPresets()
         for (const SCRIPT_PATH of [
             'modules/BinFile.js',
             'modules/HashCalculator.js',
@@ -28,6 +29,12 @@ class Randomizer {
             script.type = 'text/javascript';
             document.head.appendChild(script);
         }
+    }
+    async initPresets() {
+        if (!localStorage.rando_presets) localStorage.setItem("rando_presets", JSON.stringify({}));
+        this.local_randoPresets = JSON.parse(localStorage.rando_presets)
+        this.rando_presets = Object.assign(JSON.parse(await (await fetch("rando_presets.json")).text()), this.local_randoPresets)
+        return 67
     }
     async romFileSelect(btn) {
         if (this.loadingROM) return;
@@ -187,9 +194,16 @@ class Randomizer {
                             }
                             settings_elem.insertAdjacentHTML("beforeend", "<br>")
                         }
+                        this.changeSettingsSeed(true)
+                        this.rando_presets.default = {
+                            settings: Object.assign({}, this.rando_settings),
+                            preset_title: "Default",
+                            preset_desc: "",
+                            preset_creators: "This Website"
+                        }
+                        this.loadPresets()
                         document.getElementById("rom_selection_screen").remove()
                         document.getElementById("rando_settings_change_screen").style.display = "block"
-                        this.changeSettingsSeed()
                     } else {
                         this.rom_stats_elem.textContent = (SBT("ROM invalide. Veuillez fournir une ROM Oracle of Ages (US) valide.", "Invalid ROM. Please provide a valid Oracle of Ages (US) ROM."));
                     }
@@ -202,7 +216,75 @@ class Randomizer {
         };
         input.click();
     }
-    changeSettingsSeed() {
+    loadPresets(savedPreset = false, deletedPreset = false) {
+        const rando_presets_elem = document.getElementById("rando_presets");
+        rando_presets_elem.innerHTML = ""
+        for (const p in this.rando_presets) {
+            const option = document.createElement("option")
+            if (p == "default" && !savedPreset) option.setAttribute("selected", "")
+            option.value = p
+            option.title = this.rando_presets[p].preset_desc + "\n\nCreator(s): " + this.rando_presets[p].preset_creators
+            option.textContent = this.rando_presets[p].preset_title
+            rando_presets_elem.appendChild(option)
+        }
+        if (!savedPreset) this.changePreset("default", deletedPreset);
+        document.getElementById("del_all_presets_btn").style.display = Object.keys(this.local_randoPresets).length == 0 ? "none" : "block"
+    }
+    savePreset(form) {
+        const preset_stuff = {
+            settings: Object.assign({}, this.rando_settings)
+        }
+        const preset_save_status_elem = document.getElementById("preset_save_status")
+        preset_save_status_elem.textContent = SBT("Enregistrement du préréglage...", "Saving Preset...")
+        for (const elem of form.children) {
+            if (!elem.id) continue;
+            preset_stuff[elem.id] = elem.value
+        }
+        const p = preset_stuff.preset_title.split(" ").join("_")
+        this.local_randoPresets[p] = preset_stuff
+        Object.assign(this.rando_presets, this.local_randoPresets)
+        this.loadPresets(true)
+        localStorage.setItem("rando_presets", JSON.stringify(this.local_randoPresets))
+        preset_save_status_elem.textContent = SBT("Votre préréglage a été enregistré avec succès!", "Your Preset was saved successfully!")
+        setTimeout(() => preset_save_status_elem.textContent = "", 2000)
+    }
+    changePreset(preset, deletedPreset = false) {
+        document.getElementById("loadedPreset").textContent = this.rando_presets[preset].preset_title
+        document.getElementById("preset_mgr_btn").style.display = this.local_randoPresets[preset] ? "block" : "none"
+        if (!deletedPreset) {
+            document.getElementById('rando_seed').value = btoa(JSON.stringify(this.rando_presets[preset].settings))
+            this.changeSettingsFromSeed()
+        }
+    }
+    deletePreset() {
+        const deletingPreset = document.getElementById("loadedPreset").textContent;
+        const val = document.getElementById("rando_presets").value
+        if (confirm(`Are you sure that you want to delete ${deletingPreset}? There is no going back if you do this! You can however undo the deletion if you keep your currently selected settings and save those as a new preset.`)) {
+            document.getElementById("loadedPreset").textContent = "Deleting..."
+            delete this.local_randoPresets[val]
+            localStorage.setItem("rando_presets", JSON.stringify(this.local_randoPresets))
+            delete this.rando_presets[val]
+            this.loadPresets(false, true)
+            document.getElementById("preset_save_btn").style.display = "block"
+            alert(`${deletingPreset} was removed successfully!`);
+            document.getElementById("preset_manager").close()
+        }
+    }
+    deleteAllPresets() {
+        if (confirm(`Are you sure that you want to delete all of your presets? There is no going back if you do this!`)) {
+            localStorage.clear()
+            this.rando_status_elem.textContent = SBT("Suppression des préréglages...", "Deleting Presets...")
+            const default_preset = Object.assign({}, this.rando_presets.default)
+            this.initPresets().then(() => {
+                this.rando_presets.default = default_preset
+                this.loadPresets(false, true)
+                document.getElementById("preset_save_btn").style.display = "block"
+                alert(`All of your presets were removed successfully!`);
+                this.rando_status_elem.textContent = ""
+            })
+        }
+    }
+    changeSettingsSeed(firstTime = false) {
         for (const elem of document.getElementById("rando_settings").children) {
             if (!elem.id) continue
             if (elem.id == "romhack_version" && this.rando_settings[elem.id] != elem.value) this.rando_settings.locations = {}
@@ -216,6 +298,7 @@ class Randomizer {
             }
         }
         document.getElementById("rando_seed").value = btoa(JSON.stringify(this.rando_settings))
+        if (!firstTime) this.checkShowSavePresetBtn()
     }
     changeSettingsFromSeed() {
         try {
@@ -236,9 +319,16 @@ class Randomizer {
             console.warn("Changing settings from seed failed.", e)
             this.changeSettingsSeed()
         }
+        this.checkShowSavePresetBtn()
+    }
+    checkShowSavePresetBtn() {
+        document.getElementById('preset_save_btn').style.display = document.getElementById('rando_seed').value == btoa(
+            JSON.stringify(this.rando_presets[document.getElementById("rando_presets").value].settings)
+        ) ? "none" : "block"
     }
     async generateSeed() {
         if (this.loadingROM) return;
+        document.getElementById("rando_options").style.display = "none";
         this.loadingROM = this.rando_settings.dream_timer > 9 ? confirm([
             "Whoa there, it seems like you have configured your dream timer setting to be above 9 seconds.",
             "You are getting this confirmation box because the game will not show you your seconds past this point during your dream,",
@@ -252,7 +342,10 @@ class Randomizer {
             this.pyodide.runPythonAsync(this.pyCode + `\nimport rando_settings\nrando.generate_seed(rando_settings.get())`).then(async patch_data => {
                 this.rando_status_elem.textContent = SBT("Modification de la ROM...", "Patching ROM...")
                 for (const ext of ["bps", "sym", "txt", "json"]) {
-                    if (!this.loadingROM) break;
+                    if (!this.loadingROM) {
+                        document.getElementById('rando_options').style.display = 'block'
+                        break;
+                    }
                     if (this.fileExists(`/home/pyodide/romhack.${ext}`)) continue
                     const romhack_builds_base = `romhack_builds/${this.rando_settings.romhack_version}`
                     const fetchStats = await fetch(romhack_builds_base + `/ages.${ext}`)
@@ -303,14 +396,17 @@ class Randomizer {
                         const patch = RomPatcher.createPatch(this.romFile, romhackFile, "bps", {})
                         document.getElementById("randoRomDownload").setAttribute("href", `data:application/octet-stream;base64,${romhackFile._u8array.toBase64()}`);
                         document.getElementById("patchFileDownload").setAttribute("href", `data:application/octet-stream;base64,${patch.export('my_patch')._u8array.toBase64()}`);
+                        document.getElementById('rando_options').style.display = 'block'
                     }
                 }).catch((error) => {
                     this.loadingROM = false
+                    document.getElementById('rando_options').style.display = 'block'
                     console.error("Error patching ROM:", error);
                     this.rando_status_elem.textContent = (SBT("Erreur lors de la patching de la ROM. Veuillez vérifier la console pour plus de détails.", "Error patching ROM. Please check the console for more details."));
                 })
             }).catch((error) => {
                 this.loadingROM = false
+                document.getElementById('rando_options').style.display = 'block'
                 console.error("Error running the randomizer:", error);
                 this.rando_status_elem.textContent = (SBT("Erreur lors de l'exécution du générateur aléatoire. Veuillez vérifier la console pour plus de détails.", "Error running the randomizer. Please check the console for more details."));
             })

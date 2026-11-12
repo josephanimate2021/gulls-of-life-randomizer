@@ -56,7 +56,7 @@ SETTINGS = {
         "disable_dream_timer": {
             "default": False,
             "fr": "Désactiver Dream Timer",
-            "description": ["Lorsque cette option est activée, deux octets seront mis à 0, ce qui empêchera l'affichage du chronomètre sur le HUD et rendra ainsi ce dernier totalement inactif. Si vous souhaitez explorer le rêve sans subir de ralentissements dans le jeu, utilisez plutôt cette fonctionnalité.", "When enabled, 2 bytes will be set to 0 which will prevent the timer from being shown on the HUD, thus causing the timer to not have any effect on all. If you want to explore the dream while not lagging out the game, use this feature instead."]
+            "description": ["Lorsque cette option est activée, deux octets seront mis à 0, ce qui empêchera l'affichage du chronomètre sur le HUD et rendra ainsi ce dernier totalement inactif pendant le rêve. Si vous souhaitez explorer le rêve sans que le jeu ne subisse de ralentissements, utilisez plutôt cette fonctionnalité.", "When enabled, 2 bytes will be set to 0 which will prevent the timer from being shown on the HUD, thus causing the timer to not have any effect at all during the dream. If you want to explore the dream while not lagging out the game, use this feature instead."]
         }
     },
     1: {
