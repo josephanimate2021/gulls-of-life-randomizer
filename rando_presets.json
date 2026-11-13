@@ -1,1 +1,23 @@
-{}
+{
+    "norando_rom_latest": {
+        "preset_title": "Vanila ROM (v1.0/1.1)",
+        "preset_desc": "This preset allows you to use the vanila version of the Gulls of Life romhack with any selected build. v1.0/1.1 was selected as a default romhack version for good stability.",
+        "preset_creators": "Joseph",
+        "settings": {
+            "shuffle_dungeons": false,
+            "shuffle_items": false,
+            "keysanity": false,
+            "locations": {},
+            "shuffle_bosses": false,
+            "shuffle_all": false,
+            "guarentee_sword": true,
+            "logic": "casual",
+            "dream_timer": "7",
+            "disable_dream_timer": false,
+            "show_ballade_cutscenes": false,
+            "vanilaize_rom": true,
+            "romhack_version": "1.0_1.1",
+            "max_out_dream_timer": false
+        }
+    }
+}

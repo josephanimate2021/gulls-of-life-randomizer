@@ -72,7 +72,7 @@ def get_item_id_and_subid(item_name: str) -> list[int]:
     return [item_data["id"], 0x00 if "subid" not in item_data else item_data["subid"]]
 
 def using_onedungeon_version(patch_data: dict) -> bool:
-    return patch_data["romhack_version"] in ["1.0_1.1", "1.0_1"]
+    return patch_data["romhack_version"] in ["1.0_1.1", "1.0_1", "0.3", "0.2", "0.1"]
 
 def remove_unneccessary_cutscenes(rom_data: RomData, parsed_sym: sym, patch_data: dict) -> None:
     """
@@ -140,7 +140,7 @@ def modify_dream_timer(patch_data: dict, parsed_sym: sym, asm_code: dict):
         "jr nz,$0050\n",
     ]
     code = ""
-    if patch_data["romhack_version"] not in ["1.0_2", "1.0_1.1", "1.0_1"]:
+    if patch_data["romhack_version"] not in ["1.0_2", "1.0_1.1", "1.0_1", "0.3"]:
         code_array[3] = (
             "ld e,$00\n"
             "ld a,(de)\n"

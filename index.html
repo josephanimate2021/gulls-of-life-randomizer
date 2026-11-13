@@ -54,7 +54,7 @@
                     <textarea id="preset_creators" placeholder="John Doe" required style="width: 376px; height: 154px;"></textarea><br>
                     <button type="submit"data-en="Save Preset">Enregistrer le préréglage</button>
                 </form>
-                <button onclick="document.getElementById('preset_save_dialog').close()" data-en="Close Modal">Fermer la fenêtre modale</button>
+                <button onclick="document.getElementById('preset_save_dialog').close()" data-en="Close Modal" id="preset_save_closeModal_btn">Fermer la fenêtre modale</button>
             </dialog>
             <dialog id="preset_upload_instructions">
                 <h2>Uploading A Preset to this website</h2>
@@ -133,8 +133,9 @@
                         <button onclick="rando.newPlandoSession()" data-en="Open Plandomizer">Ouvrir Plandomizer</button>
                         <label for="rando_presets" data-en="Setting Preset:">Réglage préréglé:</label>
                         <select id="rando_presets" onchange="rando.changePreset(this.value)"></select>
+                        <a href="javascript:;" onclick="rando.uploadPreset()" data-en="Upload Gulls Of Like Spoiler Log as Settings Preset">Enregistrer le journal des spoilers de « Gulls Of Like » en tant que préréglage dans les paramètres</a>
                         <a href="javascript:;" onclick="rando.deleteAllPresets()" data-en="Delete All Presets" id="del_all_presets_btn">Supprimer tous les préréglages</a>
-                        <a href="javascript:;" onclick="document.getElementById('preset_save_dialog').showModal()" id="preset_save_btn" style="display: none;" data-en="Save Preset">Enregistrer le préréglage</a>
+                        <a href="javascript:;" onclick="rando.openPresetSaveDialog()"" id="preset_save_btn" style="display: none;" data-en="Save Preset">Enregistrer le préréglage</a>
                         <a href="javascript:;" onclick="document.getElementById('preset_manager').showModal()" id="preset_mgr_btn" data-en="Preset Manager">Gestionnaire de préréglages</a>
                     </div>
                     <div id="rando_settings"></div>

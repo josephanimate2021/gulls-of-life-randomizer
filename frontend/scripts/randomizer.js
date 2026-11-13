@@ -41,7 +41,6 @@ class Randomizer {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = '.gbc,.zip';
-        input.title = SBT('Sélectionner un fichier ROM', 'Select a ROM file');
         input.onchange = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -216,6 +215,86 @@ class Randomizer {
         };
         input.click();
     }
+    openPresetSaveDialog() {
+        if (!this.uploaded_preset_settings) document.getElementById('preset_save_dialog').showModal();
+        else {
+            const riskingLooseUploadedPresetSettings = confirm(SBT(
+                "Vous disposez encore des préréglages que vous avez importés et que vous n'avez pas encore enregistrés. Êtes-vous sûr de vouloir vraiment perdre ces préréglages ?",
+                "You still have your uploaded preset settings that you have yet to save. Are you sure that you really want to loose your uploaded settings?"
+            ))
+            if (riskingLooseUploadedPresetSettings) {
+                delete this.uploaded_preset_settings
+                this.loadingROM = false
+                this.openPresetSaveDialog()
+            }
+        }
+    }
+    uploadPreset() {
+        if (this.uploaded_preset_settings) {
+            document.getElementById('preset_save_dialog').showModal()
+            return
+        }
+        if (this.loadingROM) return
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            this.loadingROM = true
+            this.rando_status_elem.textContent = SBT("Mise en ligne du journal des spoilers de « Gulls Of Life »...", "Uploading Gulls Of Life Spoiler Log...")
+            const reader = new FileReader()
+            reader.addEventListener("loadend", h => {
+                try {
+                    const settings = JSON.parse(h.target.result)
+                    let propsIncluded = settings.seed && settings.patch_data
+                    if (propsIncluded) for (const p in this.rando_settings) {
+                        if (
+                            typeof settings.patch_data[p] != "undefined"
+                            && typeof this.rando_settings[p] == typeof settings.patch_data[p]
+                        ) propsIncluded = true
+                        else {
+                            propsIncluded = false
+                            break
+                        }
+                    }
+                    if (!propsIncluded) {
+                        this.rando_status_elem.textContent = SBT("Votre fichier journal des spoilers de « Gulls of Life » n'est pas valide. Veuillez essayer de télécharger un fichier journal de spoilers de « Gulls of Life » valide.", "Your gulls of life spoiler log file is not valid. Please try uploading a valid gulls of life spoiler log.")
+                        this.loadingROM = false
+                    } else {
+                        const includeLocations = Object.keys(settings.patch_data.locations).length != 0 && confirm(SBT("Souhaitez-vous inclure vos emplacements aléatoires dans votre préréglage?", "Do you want to include your randomized locations inside your preset?"))
+                        if (!includeLocations) settings.patch_data.locations = {}
+                        let settingsSame = ["", false]
+                        for (const p in this.rando_presets) {
+                            if (JSON.stringify(this.rando_presets[p].settings) == JSON.stringify(settings.patch_data)) {
+                                settingsSame = [
+                                    this.rando_presets[p].preset_title,
+                                    true
+                                ]
+                                break
+                            }
+                        }
+                        if (settingsSame[1]) {
+                            this.loadingROM = false
+                            this.rando_status_elem.textContent = SBT(`Votre fichier journal « Gulls of Life » contient les mêmes paramètres que le préréglage ${settingsSame[0]}. Veuillez essayer de télécharger un autre fichier journal « Gulls of Life » comportant des paramètres différents.`, `Your gulls of life spoiler log contains the same settings as the ${settingsSame[0]} preset. Please try uploading a different gulls of life spoiler log with the different settings on it.`)
+                            return
+                        }
+                        const preset_stuff = document.getElementById('preset_save_dialog')
+                        this.uploaded_preset_settings = settings.patch_data
+                        this.rando_status_elem.textContent = ""
+                        preset_stuff.showModal()
+                        this.loadingROM = false
+                    }
+                } catch (e) {
+                    console.error("Error uploading JSON file", e)
+                    this.rando_status_elem.textContent = SBT("Impossible de télécharger votre journal de spoilers sur « Gulls of Life ». Veuillez consulter la console développeur pour plus de détails.", "Could not upload your gulls of life spoiler log. Please check the developer console for more details.")
+                    this.loadingROM = false
+                }
+            })
+            reader.readAsText(file)
+        }
+        input.click()
+    }
     loadPresets(savedPreset = false, deletedPreset = false) {
         const rando_presets_elem = document.getElementById("rando_presets");
         rando_presets_elem.innerHTML = ""
@@ -232,7 +311,12 @@ class Randomizer {
     }
     savePreset(form) {
         const preset_stuff = {
-            settings: Object.assign({}, this.rando_settings)
+            settings: Object.assign({}, this.uploaded_preset_settings || this.rando_settings)
+        }
+        const preset_save_modalClose_elem = document.getElementById("preset_save_closeModal_btn")
+        if (this.uploaded_preset_settings) {
+            preset_save_modalClose_elem.setAttribute("disabled", "")
+            delete this.uploaded_preset_settings
         }
         const preset_save_status_elem = document.getElementById("preset_save_status")
         preset_save_status_elem.textContent = SBT("Enregistrement du préréglage...", "Saving Preset...")
@@ -246,7 +330,13 @@ class Randomizer {
         this.loadPresets(true)
         localStorage.setItem("rando_presets", JSON.stringify(this.local_randoPresets))
         preset_save_status_elem.textContent = SBT("Votre préréglage a été enregistré avec succès!", "Your Preset was saved successfully!")
-        setTimeout(() => preset_save_status_elem.textContent = "", 2000)
+        setTimeout(() => {
+            if (preset_save_modalClose_elem.hasAttribute("disabled")) {
+                preset_save_modalClose_elem.removeAttribute("disabled")
+                document.getElementById('preset_save_dialog').close()
+            }
+            preset_save_status_elem.textContent = "";
+        }, 3000)
     }
     changePreset(preset, deletedPreset = false) {
         document.getElementById("loadedPreset").textContent = this.rando_presets[preset].preset_title
@@ -259,7 +349,10 @@ class Randomizer {
     deletePreset() {
         const deletingPreset = document.getElementById("loadedPreset").textContent;
         const val = document.getElementById("rando_presets").value
-        if (confirm(`Are you sure that you want to delete ${deletingPreset}? There is no going back if you do this! You can however undo the deletion if you keep your currently selected settings and save those as a new preset.`)) {
+        if (confirm(SBT(
+            `Êtes-vous sûr de vouloir supprimer ${deletingPreset} ? Cette action est irréversible ! Vous pouvez toutefois annuler la suppression si vous conservez les paramètres actuellement sélectionnés et que vous les enregistrez en tant que nouveau préréglage.`,
+            `Are you sure that you want to delete ${deletingPreset}? There is no going back if you do this! You can however undo the deletion if you keep your currently selected settings and save those as a new preset.`
+        ))) {
             document.getElementById("loadedPreset").textContent = "Deleting..."
             delete this.local_randoPresets[val]
             localStorage.setItem("rando_presets", JSON.stringify(this.local_randoPresets))
@@ -271,7 +364,10 @@ class Randomizer {
         }
     }
     deleteAllPresets() {
-        if (confirm(`Are you sure that you want to delete all of your presets? There is no going back if you do this!`)) {
+        if (confirm(SBT(
+            "Êtes-vous sûr de vouloir supprimer tous vos préréglages ? Une fois cette opération effectuée, vous ne pourrez plus revenir en arrière !", 
+            `Are you sure that you want to delete all of your presets? There is no going back if you do this!`
+        ))) {
             localStorage.clear()
             this.rando_status_elem.textContent = SBT("Suppression des préréglages...", "Deleting Presets...")
             const default_preset = Object.assign({}, this.rando_presets.default)
@@ -287,7 +383,10 @@ class Randomizer {
     changeSettingsSeed(firstTime = false) {
         for (const elem of document.getElementById("rando_settings").children) {
             if (!elem.id) continue
-            if (elem.id == "romhack_version" && this.rando_settings[elem.id] != elem.value) this.rando_settings.locations = {}
+            if (elem.id == "romhack_version") {
+                if (this.rando_settings[elem.id] != elem.value) this.rando_settings.locations = {}
+                this.actionOnRomhackVersionChange(elem.value)
+            }
             switch (elem.getAttribute("type")) {
                 case "checkbox": {
                     this.rando_settings[elem.id] = elem.checked
@@ -298,13 +397,23 @@ class Randomizer {
             }
         }
         document.getElementById("rando_seed").value = btoa(JSON.stringify(this.rando_settings))
-        if (!firstTime) this.checkShowSavePresetBtn()
+        if (!firstTime) this.checkShowSavePresetBtn();
+    }
+    actionOnRomhackVersionChange(v) {
+        for (
+            const e of ["disable_dream_timer", "max_out_dream_timer", "dream_timer"]
+        ) {
+            const elem = document.getElementById(e)
+            if (v == "0.2" || v == "0.1") elem.setAttribute("disabled", "");
+            else if (elem.hasAttribute("disabled")) elem.removeAttribute("disabled");
+        }
     }
     changeSettingsFromSeed() {
         try {
             this.rando_settings = JSON.parse(atob(document.getElementById("rando_seed").value))
             for (const i in this.rando_settings) {
                 if (i == "locations") continue;
+                if (i == "romhack_version") this.actionOnRomhackVersionChange(this.rando_settings[i])
                 const elem = document.getElementById(i)
                 switch (elem.getAttribute("type")) {
                     case "checkbox": {
@@ -329,14 +438,23 @@ class Randomizer {
     async generateSeed() {
         if (this.loadingROM) return;
         document.getElementById("rando_options").style.display = "none";
-        this.loadingROM = this.rando_settings.dream_timer > 9 ? confirm([
+        this.loadingROM = (
+            this.rando_settings.romhack_version == "0.2"
+            || this.rando_settings.romhack_version == "0.1"
+        ) || (this.rando_settings.dream_timer > 9 ? confirm(SBT([
+            "Attends un peu, on dirait que tu as réglé la durée de ton rêve sur plus de 9 secondes.",
+            "Cette fenêtre de confirmation s'affiche car le jeu ne t'indiquera pas le temps écoulé au-delà de ce seuil pendant ton rêve;",
+            "elle sert à s'assurer que tu te souviendras bien de la modification que tu as apportée à ce paramètre avant de lancer le jeu en mode aléatoire.",
+            "Es-tu sûr de vouloir continuer?"
+        ].join(" "), [
             "Whoa there, it seems like you have configured your dream timer setting to be above 9 seconds.",
             "You are getting this confirmation box because the game will not show you your seconds past this point during your dream,",
             "and it is to make sure that you will remember the change you made to this setting before randomizing the game.\nAre you sure you want to go about this?"
-        ].join(" ")) : true;
+        ].join(" "))) : true);
         if (this.loadingROM) {
             this.rando_status_elem.textContent = SBT("Changement d'emplacement...", "Shuffling Locations...")
-            if (!this.fileExists("/home/pyodide/rando_settings.py")) this.pyodide.FS.writeFile(
+            if (this.fileExists("/home/pyodide/rando_settings.py")) this.pyodide.FS.unlink("/home/pyodide/rando_settings.py")
+            this.pyodide.FS.writeFile(
                 "/home/pyodide/rando_settings.py", `import json\ndef get():\n\treturn json.loads('${JSON.stringify(this.rando_settings)}')`
             )
             this.pyodide.runPythonAsync(this.pyCode + `\nimport rando_settings\nrando.generate_seed(rando_settings.get())`).then(async patch_data => {

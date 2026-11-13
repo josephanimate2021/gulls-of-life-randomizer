@@ -11,6 +11,7 @@ from .ap.patching.z80asm.Assembler import *
 from .patching.functions import *
 from .patching.sym import sym
 from .patching.defines import DEFINES
+from .patching.set_rom_flags import RomGlobalFlags
 
 class Randomizer():
     def __init__(self):
@@ -175,6 +176,8 @@ class Randomizer():
         settings_copy = json.loads(open("settings_copy.json", "r").read())
         parsed_sym = sym("romhack.sym")
         asm_code = {}
+        if patch_data["romhack_version"] not in ["0.1", "0.2", "0.3"]:
+            init_flags = RomGlobalFlags(parsed_sym, asm_code, patch_data)
 
         # define assembler things inside the Randomizer class.
         bank_caves = [int(i, 0) for i in json.loads(open("romhack.json").read())]
@@ -186,6 +189,7 @@ class Randomizer():
             [ringMenuBeg.offset, ringMenuEnd.offset], # Using the ring menu since this hack dosen't use rings. (Gives us lots of space here)
             bank_caves[0x02] # end of bank
         ]
+        
         for p, v in parsed_sym.get_labels(as_defines=True).items():
             DEFINES[p] = v
 
@@ -197,9 +201,10 @@ class Randomizer():
             apply_bugfixes(rom_data, parsed_sym)
             remove_unneccessary_cutscenes(rom_data, parsed_sym, patch_data)
             add_warp_to_start(parsed_sym, asm_code)
-            modify_dream_timer(patch_data, parsed_sym, asm_code)
-        if patch_data["apply_fr_lang"]:
-            change_language_to_french(parsed_sym, asm_code)
+            if patch_data["romhack_version"] not in ["0.2", "0.1"]:
+                modify_dream_timer(patch_data, parsed_sym, asm_code)
+        if patch_data["apply_fr_lang"] and patch_data["romhack_version"] not in ["0.1", "0.2", "0.3"]:
+            init_flags.insert_code("ld a,$01\nld (wActiveLanguage),a\n")
 
         # Compile ASM code.
         print(f"Compiling ASM files...")

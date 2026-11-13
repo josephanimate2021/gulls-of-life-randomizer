@@ -79,10 +79,13 @@ SETTINGS = {
                     "1.0_1": "v1.0/1",
                 },
                 3: {
-                    "1.0_2": "v1.0/2"
+                    "1.0_2": "v1.0/2",
+                    "0.3": "v0.3",
+                    "0.2": "v0.2",
+                    "0.1": "v0.1 (All text is in french)"
                 },
                 4: {
-                    "dev": ["Version de développement", "Dev Build"]
+                    "dev": ["Version de développement", "Dev Build"],
                 }
             },
             "fr": "Version Romhack"
