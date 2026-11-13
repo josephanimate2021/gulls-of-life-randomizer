@@ -17,6 +17,7 @@ class Randomizer():
     def __init__(self):
         self.rom = open("ages.gbc", "rb").read()
         self.location_data = {}
+        self.rando_settings = {}
 
     def get_filler_item(self, consider_dungeon):
         filler_items = []
@@ -29,6 +30,7 @@ class Randomizer():
     def generate_seed(self, settings: dict):
         # Check to see if the shuffle_all setting is checked. If so, check all other items assosiated with it.
         self.settings_copy = settings.copy()
+        open("rando_settings.json", "w").write(json.dumps(settings))
         excempt_settings = ["guarentee_sword", "show_ballade_cutscenes", "disable_dream_timer", "vanilaize_rom", "max_out_dream_timer"]
         if settings["shuffle_all"]:
             for p, v in settings.items():
@@ -167,7 +169,7 @@ class Randomizer():
                         if len(settings["locations"]) == len(self.location_data):
                             break
         open("settings_copy.json", "w").write(json.dumps(self.settings_copy))
-        return json.dumps(settings)
+        return open("rando_settings.json").read()
 
     def patch_rom(self, patch_data: dict) -> dict[str, str]:
         # Define variables

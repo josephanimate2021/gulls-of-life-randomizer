@@ -456,11 +456,7 @@ class Randomizer {
         ].join(" "))) : true);
         if (this.loadingROM) {
             this.rando_status_elem.textContent = SBT("Changement d'emplacement...", "Shuffling Locations...")
-            if (this.fileExists("/home/pyodide/rando_settings.py")) this.pyodide.FS.unlink("/home/pyodide/rando_settings.py")
-            this.pyodide.FS.writeFile(
-                "/home/pyodide/rando_settings.py", `import json\ndef get():\n\treturn json.loads('${JSON.stringify(this.rando_settings)}')`
-            )
-            this.pyodide.runPythonAsync(this.pyCode + `\nimport rando_settings\nrando.generate_seed(rando_settings.get())`).then(async patch_data => {
+            this.pyodide.runPythonAsync(this.pyCode + `\nrando.generate_seed(json.loads('${JSON.stringify(this.rando_settings)}'))`).then(async patch_data => {
                 this.rando_status_elem.textContent = SBT("Modification de la ROM...", "Patching ROM...")
                 for (const ext of ["bps", "sym", "txt", "json"]) {
                     if (!this.loadingROM) {
