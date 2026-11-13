@@ -7,10 +7,10 @@ Gulls of Life is a romhack based on Oracle of Ages which is a sequel to Link’s
 Marin wishes that she could come back as a seagull and as a result her wish comes true and ends up coming back as a seagull after all, on a side where no one dreams anymore.
 
 ## Where you would normally start in the game
-You would start in the remains of Koholint Island where you are greeted by Marin as a seagull (the randomizer will skip this sequence, along with the cutscenes).
+You would start in Mist Island where you are greeted by Marin as a seagull (the randomizer will skip this sequence, along with the cutscenes).
 
 ## The Goal
-You are supposed to restore everyone’s dreams to make them all come true by curing the dark from all 4 dungeons (one is currently functioning in the release, 2 in the dev version)
+You are supposed to restore everyone’s dreams to make them all come true by curing the dark from all 8 dungeons (one is currently functioning in the release, 8 (3 are accessible) in the dev version)
 
 ## Why this randomizer
 The game can get boring if you beat the same story many times. A purpose of this randomizer is to take all of the items from each location and shuffle them around, giving you a new experience time.
