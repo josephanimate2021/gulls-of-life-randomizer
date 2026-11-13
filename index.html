@@ -58,6 +58,23 @@
             </dialog>
             <dialog id="preset_upload_instructions">
                 <h2>Uploading A Preset to this website</h2>
+                <ol class="hearts">
+                    <li data-en="Create a fork of the Github Source Code by clicking &lt;a href=&quot;https://github.com/josephanimate2021/gulls-of-life-randomizer/fork&quot;&gt;here&lt;/a&gt; and then following the prompts to complete the fork.">
+                        Créez un fork du code source sur GitHub en cliquant
+                        <a href="https://github.com/josephanimate2021/gulls-of-life-randomizer/fork">ici</a>
+                        puis en suivant les instructions pour finaliser le fork.
+                    </li>
+                    <li data-en="Download your preset + all presets &lt;a id=&quot;presetDownload&quot; download=&quot;rando_presets.json&quot;&gt;here&lt;/a>.">
+                        Téléchargez votre préréglage + tous les préréglages <a id="presetDownload" download="rando_presets.json">ici</a>.
+                    </li>
+                    <li data-en="Drop your downloaded file into the root folder of the source code on GitHub.">
+                        Placez le fichier que vous avez téléchargé dans le dossier racine du code source sur GitHub.
+                    </li>
+                    <li data-en="Commit your changes and then send a pull request. You will have to wait until your pull request gets approved in order for your preset to end up on the website.">
+                        Validez vos modifications, puis envoyez une demande de fusion. 
+                        Vous devrez attendre que votre demande de fusion soit approuvée pour que votre préréglage soit publié sur le site web.
+                    </li>
+                </ol>
                 <button onclick="document.getElementById('preset_upload_instructions').close()" data-en="Close Modal">Fermer la fenêtre modale</button>
             </dialog>
             <dialog id="preset_manager">
@@ -135,7 +152,7 @@
                         <select id="rando_presets" onchange="rando.changePreset(this.value)"></select>
                         <a href="javascript:;" onclick="rando.uploadPreset()" data-en="Upload Gulls Of Like Spoiler Log as Settings Preset">Enregistrer le journal des spoilers de « Gulls Of Like » en tant que préréglage dans les paramètres</a>
                         <a href="javascript:;" onclick="rando.deleteAllPresets()" data-en="Delete All Presets" id="del_all_presets_btn">Supprimer tous les préréglages</a>
-                        <a href="javascript:;" onclick="rando.openPresetSaveDialog()"" id="preset_save_btn" style="display: none;" data-en="Save Preset">Enregistrer le préréglage</a>
+                        <a href="javascript:;" onclick="rando.openPresetSaveDialog()" id="preset_save_btn" style="display: none;" data-en="Save Preset">Enregistrer le préréglage</a>
                         <a href="javascript:;" onclick="document.getElementById('preset_manager').showModal()" id="preset_mgr_btn" data-en="Preset Manager">Gestionnaire de préréglages</a>
                     </div>
                     <div id="rando_settings"></div>

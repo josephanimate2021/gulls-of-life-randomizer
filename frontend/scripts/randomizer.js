@@ -339,6 +339,9 @@ class Randomizer {
         }, 3000)
     }
     changePreset(preset, deletedPreset = false) {
+        const randoPresets_copy = Object.assign({}, this.rando_presets)
+        delete randoPresets_copy.default
+        document.getElementById("presetDownload").href = `data:application/json;base64,${btoa(JSON.stringify(randoPresets_copy, null, "\t"))}`
         document.getElementById("loadedPreset").textContent = this.rando_presets[preset].preset_title
         document.getElementById("preset_mgr_btn").style.display = this.local_randoPresets[preset] ? "block" : "none"
         if (!deletedPreset) {
