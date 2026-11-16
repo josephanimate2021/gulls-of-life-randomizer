@@ -14,4 +14,4 @@ class RomGlobalFlags():
             "ret"
         )
     def insert_code(self, new_code: str):
-        self.asm_code[f"{self.bank}//setInitFlags"] = new_code + self.asm_code[f"{self.bank}//setInitFlags"]
+        self.asm_code[f"{self.bank}//setInitFlags"] = f"{new_code}\n" + self.asm_code[f"{self.bank}//setInitFlags"]

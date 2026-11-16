@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 from ..ap.patching.RomData import RomData
 from .sym import sym
@@ -7,6 +8,7 @@ from ..data.locations import *
 from ..ap.patching.Util import simple_hex
 from ..ap.patching.z80asm.Assembler import Z80Assembler, Z80Block, GameboyAddress
 from ..ap.patching.z80asm.Util import value_to_byte_array
+from .set_rom_flags import RomGlobalFlags
 
 def apply_bugfixes(rom_data: RomData, parsed_sym: sym) -> None:
     """
@@ -72,22 +74,42 @@ def get_item_id_and_subid(item_name: str) -> list[int]:
     return [item_data["id"], 0x00 if "subid" not in item_data else item_data["subid"]]
 
 def using_onedungeon_version(patch_data: dict) -> bool:
-    return patch_data["romhack_version"] in ["1.0_1.1", "1.0_1", "0.3", "0.2", "0.1"]
+    return patch_data["romhack_version"] in ["1.0_1.1", "1.0_1", "0.3.1", "0.3", "0.2", "0.1"]
 
-def remove_unneccessary_cutscenes(rom_data: RomData, parsed_sym: sym, patch_data: dict) -> None:
+def remove_unneccessary_cutscenes(rom_data: RomData, parsed_sym: sym, patch_data: dict, rom_flags: RomGlobalFlags | None) -> None:
     """
     Removes unnecessary cutscenes and interactions from the ROM data.
     """
-    groups: list[tuple[str, int]] = [
-        # these first two trigger an unnecessary cutscene that we don't want. the rest of the segull interactions can stay without issue.
-        ("group1MapaaObjectData", 0), ("group2Map9eObjectData", 0),
-    ] if not patch_data["show_ballade_cutscenes"] else []
-    if using_onedungeon_version(patch_data) and not patch_data["show_ballade_cutscenes"]: # we can only remove the segull interaction from room 7b if we're using an older version because newer versions since give you a check.
-        groups.append(("group1Map7bObjectData", 0))
-    for group, n in groups:
-        l = parsed_sym.find("label", group)
-        if l is not None: # Place all INTERAC_97 interactions in the same group.
-            rom_data.write_bytes(l.address_in_rom() + n, [0x97, 0x67, 0xff, 0xff])
+    if patch_data["romhack_version"] in ["0.1", "0.2"]:
+        groups: list[tuple[str, int]] = [
+            # these first two trigger an unnecessary cutscene that we don't want. the rest of the segull interactions can stay without issue.
+            ("group1MapaaObjectData", 0), ("group2Map9eObjectData", 0),
+            ("group1Map7bObjectData", 0) # Adding this here because we don't get anything from the ending dungeon cutscene right now.
+        ] if not patch_data["show_ballade_cutscenes"] else []
+        for group, n in groups:
+            l = parsed_sym.find("label", group)
+            if l is not None: # Place all INTERAC_97 interactions in the same group.
+                rom_data.write_bytes(l.address_in_rom() + n, [0x97, 0x67, 0xff, 0xff])
+    else:
+        # Set roomflag 40 to all rooms with a cutscene in them because the creator set them up to check that flag.
+        rooms_for_applyflag40 = [0x1aa, 0x29e]
+        if using_onedungeon_version(patch_data): # We cannot avoid this cutscene flag in newer versions because we need a dream book to venture further into the game.
+            rooms_for_applyflag40.append(0x17b)
+        else:
+            if patch_data["romhack_version"] in ["dev"]:
+                pass # TODO: figure out d3-d7 and their outside entrances
+        if patch_data["romhack_version"] not in ["0.3.1", "0.3"]:
+            rooms_for_applyflag40.append(0x413)
+        set_room_flags(0x40, rooms_for_applyflag40, rom_flags)
+
+def set_room_flags(flag: int, rooms: int | list[int], rom_flags: RomGlobalFlags):
+    if not isinstance(rooms, list) and isinstance(rooms, int):
+        rooms = [rooms]
+    if len(rooms) > 0:
+        for room in rooms:
+            startflag = 0xc300 if room >= 0x600 else 0xc500 if room >= 0x200 else 0xc700
+            rom_flags.insert_code(f"ld (${simple_hex(startflag + room, 4)}),a")
+        rom_flags.insert_code(f"ld a,${simple_hex(flag)}")
 
 def add_warp_to_start(parsed_sym: sym, asm_code: dict):
     menuFadeAddr = parsed_sym.find("label", "menuStateFadeIntoMenu")
