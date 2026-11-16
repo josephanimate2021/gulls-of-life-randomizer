@@ -12,14 +12,14 @@ locations_data = {
         "vanila_item": "Rupees (30)",
         "requirements": None,
         "room": 0x041f,
-        "not_compatiable_versions": ["1.0_1", "0.3", "0.2", "0.1"],
+        "not_compatiable_versions": ["1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
         "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
         "dungeon": 1
     },
     "Dark Lighthouse: Chest With Pots And a Zol": {
         "vanila_item": "Small Key (Dark Lighthouse)",
         "requirements": None,
-        "compatiable_versions": ["1.0_1", "0.3", "0.2", "0.1"],
+        "compatiable_versions": ["1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
         "room": 0x041b,
         "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
         "dungeon": 1
@@ -31,7 +31,7 @@ locations_data = {
                 ("Sword", 1)
             ]
         },
-        "not_compatiable_versions": ["1.0_1", "0.3", "0.2", "0.1"],
+        "not_compatiable_versions": ["1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
         "room": 0x041e,
         "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
         "dungeon": 1
@@ -43,7 +43,7 @@ locations_data = {
                 ("Lantern Of Dreams", 1)
             ]
         },
-        "not_compatiable_versions": ["1.0_1", "0.3", "0.2", "0.1"],
+        "not_compatiable_versions": ["1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
         "room": 0x041D,
         "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
         "dungeon": 1
@@ -51,7 +51,7 @@ locations_data = {
     "Dark Lighthouse: Chest Across Holes": {
         "vanila_item": "Small Key (Dark Lighthouse)",
         "requirements": None,
-        "not_compatiable_versions": ["1.0_1", "0.3", "0.2", "0.1"],
+        "not_compatiable_versions": ["1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
         "room": 0x041C,
         "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
         "dungeon": 1
@@ -75,7 +75,7 @@ locations_data = {
                 has_small_keys(1, 1)
             ]
         },
-        "compatiable_versions": ["0.3", "0.2", "0.1"],
+        "compatiable_versions": ["0.3.1", "0.3", "0.2", "0.1"],
         "room": 0x041C,
         "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
         "dungeon": 1
@@ -87,14 +87,14 @@ locations_data = {
                 has_small_keys(1, 2), # Keeping this in despite the oldest version being present to prevent softlocks.
             ]
         },
-        "not_compatiable_versions": ["0.3", "0.2", "0.1"],
+        "not_compatiable_versions": ["0.3.1", "0.3", "0.2", "0.1"],
         "room": 0x0417,
         "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
         "dungeon": 1
     },
     "Dark Lighthouse: Chest Near Armos And Block": {
         "vanila_item": "Rupees (100)",
-        "not_compatiable_versions": ["0.3", "0.2", "0.1"],
+        "not_compatiable_versions": ["0.3.1", "0.3", "0.2", "0.1"],
         "requirements": None,
         "room": 0x041A,
         "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
@@ -107,7 +107,7 @@ locations_data = {
                 has_small_keys(1, 3)
             ]
         },
-        "not_compatiable_versions": ["1.0_1", "0.3", "0.2", "0.1"],
+        "not_compatiable_versions": ["1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
         "room": 0x0419,
         "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
         "dungeon": 1

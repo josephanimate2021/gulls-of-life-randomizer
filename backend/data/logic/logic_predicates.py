@@ -12,6 +12,6 @@ def has_boss_key(dungeon_id: int):
 def has_first_version():
     if os.path.exists("rando_settings.json"):
         rando_settings = json.loads(open("rando_settings.json").read())
-        return rando_settings["romhack_version"] in ["1.0_1", "0.3", "0.2", "0.1"]
+        return rando_settings["romhack_version"] in ["1.0_1", "0.3.1", "0.3", "0.2", "0.1"]
     else:
         return False

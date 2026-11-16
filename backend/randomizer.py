@@ -178,7 +178,7 @@ class Randomizer():
         settings_copy = json.loads(open("settings_copy.json", "r").read())
         parsed_sym = sym("romhack.sym")
         asm_code = {}
-        if patch_data["romhack_version"] not in ["0.1", "0.2", "0.3"]:
+        if patch_data["romhack_version"] not in ["0.1", "0.2"]:
             init_flags = RomGlobalFlags(parsed_sym, asm_code)
 
         # define assembler things inside the Randomizer class.
