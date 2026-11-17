@@ -157,20 +157,19 @@ def remove_unneccessary_cutscenes(rom_data: RomData, parsed_sym: sym, patch_data
                     f"db $0{endingsEmmun.index('END_DONE')}"
                 )
 
-                if patch_data["romhack_version"] in ["dev"]:
-                    # D3
+                if patch_data["romhack_version"] in ["dev"]:                     # D3
                     offsetAsInt += 6
                     asm_code[f"{bank}/{simple_hex(offsetAsInt, 4)}/"] = "dw setEndFlagsD3beg"
-                    asm_code[f"{bank}//setEndFlagsD3beg"] = f"db ${endingsEmmun.index('END_FLAG')},$53\ndb $0{endingsEmmun.index('END_STEP')},$21"
+                    asm_code[f"{bank}//setEndFlagsD3beg"] = f"db $0{endingsEmmun.index('END_FLAG')},$53\ndb $0{endingsEmmun.index('END_STEP')},$21"
                     offsetAsInt += 6
                     asm_code[f"{bank}/{simple_hex(offsetAsInt, 4)}/"] = "dw setEndFlagsD2End"
 
                     # D4-D7
                     snds = [simple_hex(i) for i in [0x4d, 0xad, 0x2b, 0x5b]]
-                    for i in range(4, 6):
+                    for i in range(4, 8):
                         offsetAsInt += 6
-                        asm_code[f"{bank}/{simple_hex(offsetAsInt, 4)}/"] = f"dw setEndFlagsD{i}beg"
-                        asm_code[f"{bank}//setEndFlagsD{i}beg"] = f"db $0{endingsEmmun.index('END_SOUND')},${snds[i - 4]}\ndb $0{endingsEmmun.index('END_FLAG')},$5{i}\ndb $0{endingsEmmun.index('END_DONE')}"
+                        asm_code[f"{bank}/{simple_hex(offsetAsInt, 4)}/"] = f"dw setEndFlagsD{i}"
+                        asm_code[f"{bank}//setEndFlagsD{i}"] = f"db $0{endingsEmmun.index('END_SOUND')},${snds[i - 4]}\ndb $0{endingsEmmun.index('END_FLAG')},$5{i}\ndb $0{endingsEmmun.index('END_DONE')}"
 
             if patch_data["romhack_version"] not in ["0.3.1", "0.3"]:
                 marineHumanScriptAddr = parsed_sym.find("label", "marineJackScript")

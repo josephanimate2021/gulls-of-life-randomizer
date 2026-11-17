@@ -187,10 +187,20 @@ class Randomizer():
         
         ringMenuBeg = parsed_sym.find("label", "runRingMenu")
         ringMenuEnd = parsed_sym.find("label", "saveQuitMenu_checkIsGameOver")
-        bank_caves[0x02] = [
+        bank_caves[ringMenuBeg.bank] = [
             [ringMenuBeg.offset, ringMenuEnd.offset], # Using the ring menu since this hack dosen't use rings. (Gives us lots of space here)
-            bank_caves[0x02] # end of bank
+            bank_caves[ringMenuBeg.bank] # end of bank
         ]
+
+        if patch_data["romhack_version"] in ["dev"] and not (
+            patch_data["show_ballade_cutscenes"] or patch_data["vanilaize_rom"]
+        ):
+            arrivalTalkAddr = parsed_sym.find("label", "arrivalTalk")
+            arrivalTalkAddrEnd = parsed_sym.find("label", "raft")
+            bank_caves[arrivalTalkAddr.bank] = [
+                [arrivalTalkAddr.offset + 3, arrivalTalkAddrEnd.offset],
+                bank_caves[arrivalTalkAddr.bank] # end of bank
+            ]
         
         for p, v in parsed_sym.get_labels(as_defines=True).items():
             DEFINES[p] = v
