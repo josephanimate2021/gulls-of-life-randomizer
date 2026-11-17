@@ -201,12 +201,15 @@ class Randomizer():
         apply_randomized_locations(rom_data, patch_data, settings_copy, parsed_sym)
         if not patch_data["vanilaize_rom"]:
             apply_bugfixes(rom_data, parsed_sym)
-            remove_unneccessary_cutscenes(rom_data, parsed_sym, patch_data, init_flags)
+            remove_unneccessary_cutscenes(rom_data, parsed_sym, patch_data, init_flags, asm_code)
             add_warp_to_start(parsed_sym, asm_code)
             if patch_data["romhack_version"] not in ["0.2", "0.1"]:
                 modify_dream_timer(patch_data, parsed_sym, asm_code)
         if patch_data["apply_fr_lang"] and patch_data["romhack_version"] not in ["0.1", "0.2"]:
             init_flags.insert_code("ld a,$01\nld (wActiveLanguage),a\n")
+        if not using_onedungeon_version(patch_data):
+            # Sets an initial flag that allows the player to use their bombs with marin the seagull early.
+            init_flags.insert_code("ld a,$58\ncall setGlobalFlag") # GLOBALFLAG_BALLADE_MARINE_BOMB
 
         # Compile ASM code.
         print(f"Compiling ASM files...")

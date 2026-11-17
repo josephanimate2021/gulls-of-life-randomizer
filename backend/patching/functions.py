@@ -76,31 +76,111 @@ def get_item_id_and_subid(item_name: str) -> list[int]:
 def using_onedungeon_version(patch_data: dict) -> bool:
     return patch_data["romhack_version"] in ["1.0_1.1", "1.0_1", "0.3.1", "0.3", "0.2", "0.1"]
 
-def remove_unneccessary_cutscenes(rom_data: RomData, parsed_sym: sym, patch_data: dict, rom_flags: RomGlobalFlags | None) -> None:
+def remove_unneccessary_cutscenes(rom_data: RomData, parsed_sym: sym, patch_data: dict, rom_flags: RomGlobalFlags | None, asm_code: dict) -> None:
     """
     Removes unnecessary cutscenes and interactions from the ROM data.
     """
-    if patch_data["romhack_version"] in ["0.1", "0.2"]:
-        groups: list[tuple[str, int]] = [
-            # these first two trigger an unnecessary cutscene that we don't want. the rest of the segull interactions can stay without issue.
-            ("group1MapaaObjectData", 0), ("group2Map9eObjectData", 0),
-            ("group1Map7bObjectData", 0) # Adding this here because we don't get anything from the ending dungeon cutscene right now.
-        ] if not patch_data["show_ballade_cutscenes"] else []
-        for group, n in groups:
-            l = parsed_sym.find("label", group)
-            if l is not None: # Place all INTERAC_97 interactions in the same group.
-                rom_data.write_bytes(l.address_in_rom() + n, [0x97, 0x67, 0xff, 0xff])
-    else:
-        # Set roomflag 40 to all rooms with a cutscene in them because the creator set them up to check that flag.
-        rooms_for_applyflag40 = [0x1aa, 0x29e]
-        if using_onedungeon_version(patch_data): # We cannot avoid this cutscene flag in newer versions because we need a dream book to venture further into the game.
-            rooms_for_applyflag40.append(0x17b)
-        else:
-            if patch_data["romhack_version"] in ["dev"]:
-                pass # TODO: figure out d3-d7 and their outside entrances
-        if patch_data["romhack_version"] not in ["0.3.1", "0.3"]:
-            rooms_for_applyflag40.append(0x413)
-        set_room_flags(0x40, rooms_for_applyflag40, rom_flags)
+    groups: list[list[str | int | list[int]]] = [["group1MapaaObjectData", 0]] if not patch_data["show_ballade_cutscenes"] else []
+    if not patch_data["show_ballade_cutscenes"]:
+        rooms_for_applyflag40 = [] # for cutscenes with INTERAC_MARINE (and a few others)
+        if using_onedungeon_version(patch_data):
+            groups.append(["group1Map7bObjectData", 0])
+        if patch_data["romhack_version"] not in ["dev"]:
+            groups.append(["group2Map9eObjectData", 0])
+        else: # Change the condition to check for an always set global flag instead of a room flag for the first time marin interaction in a dream.
+            marineHumanScriptAddr = parsed_sym.find("label", "marineHumanScript")
+            bank, offset = marineHumanScriptAddr.__str__().split(":")
+            asm_code[f"{bank}/{simple_hex(int(offset, 16) + 1, 4)}/"] = "db jumpifglobalflagset,$58"
+        if patch_data["romhack_version"] not in ["0.1", "0.2"]:
+            # Set roomflag 40 to all rooms with a cutscene in them because the creator set them up to check that flag.
+            if not using_onedungeon_version(patch_data):
+                # D1
+                groups[0].append([0xe7, 0x05]) # Give the ending script to the starting bird (May change depending on what happens in the future).
+
+                # Interaction removal for any calls to the arrivalTalk block because those aren't needed in rando context.
+                # (Gives us some space here and to set flags, and fixes the bridge apearing on it's own in one of the d2 rooms for some reason)
+                arrivalTalkAddr = parsed_sym.find("label", "arrivalTalk")
+                bank, offset = arrivalTalkAddr.__str__().split(":")
+                asm_code[f"{bank}/{offset}/"] = "jp interactionDelete"
+
+                # Give the user the dream notebook without a cutscene sequence.
+                marineToBeContinuedScriptGoAddr = parsed_sym.find("label", "marineToBeContinuedScript@go")
+                bank, offset = marineToBeContinuedScriptGoAddr.__str__().split(":")
+                offsetAsInt = int(offset, 16)
+                asm_code[f"{bank}/{simple_hex(offsetAsInt + 4, 4)}/"] = ( # TODO: dream notebook check
+                    f"db giveitem,$12,$00"
+                )
+                asm_code[f"{bank}/{simple_hex(offsetAsInt + 11, 4)}/"] = f"db $02" # Modify the ending to be 2 so that the modified beach script is called.
+                asm_code[f"{bank}/{simple_hex(offsetAsInt + 15, 4)}/"] = f"db $aa" # TODO (wWarpDestRoom For the upcoming Starting Islands feature)
+                asm_code[f"{bank}/{simple_hex(offsetAsInt + 23, 4)}/"] = f"db $42" # (wWarpDestPos) Same thing here.
+                asm_code[f"{bank}/{simple_hex(offsetAsInt + 31, 4)}/"] = f"db $81" # (wWarpDestGroup) And here.
+
+                # Skips the text and sets some flags for jingle island ontop of the marin ending beach script.
+                marinEndingBeachAddr = parsed_sym.find("label", "marineEndingScript@beach")
+                bank, offset = marinEndingBeachAddr.__str__().split(":")
+                offsetAsInt = int(offset, 16)
+                asm_code[f"{bank}/{offset}/"] = (
+                    "db setglobalflag,$50\n" # GLOBALFLAG_BALLADE_RAFT
+                    "db setglobalflag,$51\n" # GLOBALFLAG_BALLADE_ISLAND2
+                    "db writememory\n"
+                    "dw wBalladeEnding\n"
+                    "db $00\n"
+                    "db enablemenu\n"
+                    "db enableinput\n"
+                    "db scriptend"
+                )
+
+                # D2
+                # Start with modifying the d2 portion of the endings block before going down the line.
+                endingsEmmun = [
+                    "END_DONE",
+                    "END_TEXT",
+                    "END_WARP",
+                    "END_FLAG",
+                    "END_STEP",
+                    "END_SOUND",
+                    "END_WAIT",
+                ]
+                chapterEndingAddr = parsed_sym.find("label", "chapterEnding@endings")
+                bank, offset = chapterEndingAddr.__str__().split(":")
+                offsetAsInt = int(offset, 16) + 4
+                asm_code[f"{bank}/{simple_hex(offsetAsInt, 4)}/"] = "dw setEndFlagsD2beg"
+                asm_code[f"{bank}//setEndFlagsD2beg"] = (
+                    f"db $0{endingsEmmun.index('END_SOUND')},$d0\n"
+                    f"db $0{endingsEmmun.index('END_FLAG')},$52\n"
+                    f"db $0{endingsEmmun.index('END_STEP')},$11"
+                )
+                offsetAsInt += 6
+                asm_code[f"{bank}/{simple_hex(offsetAsInt, 4)}/"] = "dw setEndFlagsD2End"
+                asm_code[f"{bank}//setEndFlagsD2End"] = (
+                    f"db $0{endingsEmmun.index('END_STEP')},$00\n"
+                    f"db $0{endingsEmmun.index('END_DONE')}"
+                )
+
+                if patch_data["romhack_version"] in ["dev"]:
+                    # D3
+                    offsetAsInt += 6
+                    asm_code[f"{bank}/{simple_hex(offsetAsInt, 4)}/"] = "dw setEndFlagsD3beg"
+                    asm_code[f"{bank}//setEndFlagsD3beg"] = f"db ${endingsEmmun.index('END_FLAG')},$53\ndb $0{endingsEmmun.index('END_STEP')},$21"
+                    offsetAsInt += 6
+                    asm_code[f"{bank}/{simple_hex(offsetAsInt, 4)}/"] = "dw setEndFlagsD2End"
+
+                    # D4-D7
+                    snds = [simple_hex(i) for i in [0x4d, 0xad, 0x2b, 0x5b]]
+                    for i in range(4, 6):
+                        offsetAsInt += 6
+                        asm_code[f"{bank}/{simple_hex(offsetAsInt, 4)}/"] = f"dw setEndFlagsD{i}beg"
+                        asm_code[f"{bank}//setEndFlagsD{i}beg"] = f"db $0{endingsEmmun.index('END_SOUND')},${snds[i - 4]}\ndb $0{endingsEmmun.index('END_FLAG')},$5{i}\ndb $0{endingsEmmun.index('END_DONE')}"
+
+            if patch_data["romhack_version"] not in ["0.3.1", "0.3"]:
+                marineHumanScriptAddr = parsed_sym.find("label", "marineJackScript")
+                bank, offset = marineHumanScriptAddr.__str__().split(":")
+                asm_code[f"{bank}/{simple_hex(int(offset, 16) + 1, 4)}/"] = "db scriptend"
+            set_room_flags(0x40, rooms_for_applyflag40, rom_flags)
+        for info in groups:
+            l = parsed_sym.find("label", info[0])
+            if l is not None: # Places set interactions inside a room.
+                rom_data.write_bytes(l.address_in_rom() + find_address_for_param_helper(info[1], -1), [0xff] if not value_in_index(info, 2) else info[2])
 
 def set_room_flags(flag: int, rooms: int | list[int], rom_flags: RomGlobalFlags):
     if not isinstance(rooms, list) and isinstance(rooms, int):
@@ -110,6 +190,14 @@ def set_room_flags(flag: int, rooms: int | list[int], rom_flags: RomGlobalFlags)
             startflag = 0xc300 if room >= 0x600 else 0xc500 if room >= 0x200 else 0xc700
             rom_flags.insert_code(f"ld (${simple_hex(startflag + room, 4)}),a")
         rom_flags.insert_code(f"ld a,${simple_hex(flag)}")
+
+def value_in_index(arr: list, index: int):
+    try:
+        print("Yes, value is in index", arr[index])
+        return True
+    except:
+        print("Things didn't go as expected.")
+        return False
 
 def add_warp_to_start(parsed_sym: sym, asm_code: dict):
     menuFadeAddr = parsed_sym.find("label", "menuStateFadeIntoMenu")
@@ -147,7 +235,7 @@ def add_warp_to_start(parsed_sym: sym, asm_code: dict):
         "ret\n"
         
         "@done:\n"
-        f"jp menuStateFadeIntoMenu@openMenu"
+        "jp menuStateFadeIntoMenu@openMenu"
     )
 
 def modify_dream_timer(patch_data: dict, parsed_sym: sym, asm_code: dict):
@@ -162,14 +250,14 @@ def modify_dream_timer(patch_data: dict, parsed_sym: sym, asm_code: dict):
         "jr nz,$0050\n",
     ]
     code = ""
-    if patch_data["romhack_version"] not in ["1.0_2", "1.0_1.1", "1.0_1", "0.3"]:
+    if not using_onedungeon_version(patch_data):
         code_array[3] = (
             "ld e,$00\n"
             "ld a,(de)\n"
             "cp $02\n"
             "jr z,$0040\n"
             f"{code_array[3]}"
-        )
+        ) if patch_data["romhack_version"] != "1.0_2" else code_array[3]
     for c in code_array:
         code += c
     frames = 60 * int(patch_data["dream_timer"])
@@ -184,7 +272,7 @@ def modify_dream_timer(patch_data: dict, parsed_sym: sym, asm_code: dict):
     # Loop the way to adding code.
     for i in range(len(frame_array)):
         # Convert the asm code into bytes with the assembler.
-        fake_assembler = Z80Assembler([0x0], {}, rando.rom)
+        fake_assembler = Z80Assembler([0], {}, rando.rom)
         fake_assembler.add_block(Z80Block("00/0000/", code))
         fake_assembler.compile_all()
 
