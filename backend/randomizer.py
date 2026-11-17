@@ -201,6 +201,12 @@ class Randomizer():
                 [arrivalTalkAddr.offset + 3, arrivalTalkAddrEnd.offset],
                 bank_caves[arrivalTalkAddr.bank] # end of bank
             ]
+            praiseAddr = parsed_sym.find("label", "praise")
+            praiseAddrEnd = parsed_sym.find("label", "raft")
+            bank_caves[praiseAddr.bank] = [
+                [praiseAddr.offset + 3, praiseAddrEnd.offset],
+                bank_caves[praiseAddr.bank] # end of bank
+            ]
         
         for p, v in parsed_sym.get_labels(as_defines=True).items():
             DEFINES[p] = v

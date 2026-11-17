@@ -97,11 +97,15 @@ def remove_unneccessary_cutscenes(rom_data: RomData, parsed_sym: sym, patch_data
                 # D1
                 groups[0].append([0xe7, 0x05]) # Give the ending script to the starting bird (May change depending on what happens in the future).
 
-                # Interaction removal for any calls to the arrivalTalk block because those aren't needed in rando context.
+                # Interaction removal for any calls to all blocks listed inside the arr variable because those aren't needed in rando context.
                 # (Gives us some space here and to set flags, and fixes the bridge apearing on it's own in one of the d2 rooms for some reason)
-                arrivalTalkAddr = parsed_sym.find("label", "arrivalTalk")
-                bank, offset = arrivalTalkAddr.__str__().split(":")
-                asm_code[f"{bank}/{offset}/"] = "jp interactionDelete"
+                arr = ["arrivalTalk"]
+                if patch_data["romhack_version"] in ["dev"]:
+                    arr.append("praise")
+                for s in arr: # Same thing with the praise block
+                    praiseAddr = parsed_sym.find("label", s)
+                    bank, offset = praiseAddr.__str__().split(":")
+                    asm_code[f"{bank}/{offset}/"] = "jp interactionDelete"
 
                 # Give the user the dream notebook without a cutscene sequence.
                 marineToBeContinuedScriptGoAddr = parsed_sym.find("label", "marineToBeContinuedScript@go")
@@ -158,21 +162,20 @@ def remove_unneccessary_cutscenes(rom_data: RomData, parsed_sym: sym, patch_data
                 )
 
                 if patch_data["romhack_version"] in ["dev"]:
-                    # D3
-                    offsetAsInt += 6
-                    asm_code[f"{bank}/{simple_hex(offsetAsInt, 4)}/"] = "dw setEndFlagsD3beg"
-                    asm_code[f"{bank}//setEndFlagsD3beg"] = f"db $0{endingsEmmun.index('END_FLAG')},$53\ndb $0{endingsEmmun.index('END_STEP')},$21"
-                    offsetAsInt += 6
-                    asm_code[f"{bank}/{simple_hex(offsetAsInt, 4)}/"] = "dw setEndFlagsD2End"
+                    # D3-D7
 
-                    # D4-D7
-                    snds = [simple_hex(i) for i in [0x4d, 0xad, 0x2b, 0x5b]]
-                    for i in range(4, 8):
+                    # Sounds indicator to tell the user what dungeon they just finished. The starting number for this list is 3.
+                    snds = ["SND_TELEPORT", "SND_SOLVEPUZZLE", "SND_TUNE_OF_ECHOES", "MUS_BALLADE_TEMPETES", "SND_SOLVEPUZZLE_2"]
+
+                    # Loop until all of the code is inserted into the appropriate places.
+                    for i in range(3, 8):
                         offsetAsInt += 6
                         asm_code[f"{bank}/{simple_hex(offsetAsInt, 4)}/"] = f"dw setEndFlagsD{i}"
-                        asm_code[f"{bank}//setEndFlagsD{i}"] = f"db $0{endingsEmmun.index('END_SOUND')},${snds[i - 4]}\ndb $0{endingsEmmun.index('END_FLAG')},$5{i}\ndb $0{endingsEmmun.index('END_DONE')}"
+                        asm_code[f"{bank}//setEndFlagsD{i}"] = f"db $0{endingsEmmun.index('END_SOUND')},{snds[i - 3]}\ndb $0{endingsEmmun.index('END_FLAG')},$5{i}\ndb $0{endingsEmmun.index('END_DONE')}"
+                        if i == 3: # Special case for d3.
+                            offsetAsInt += 6
 
-            if patch_data["romhack_version"] not in ["0.3.1", "0.3"]:
+            if patch_data["romhack_version"] not in ["0.3.1", "0.3"]: # Remove the jack dialog from the game.
                 marineHumanScriptAddr = parsed_sym.find("label", "marineJackScript")
                 bank, offset = marineHumanScriptAddr.__str__().split(":")
                 asm_code[f"{bank}/{simple_hex(int(offset, 16) + 1, 4)}/"] = "db scriptend"
