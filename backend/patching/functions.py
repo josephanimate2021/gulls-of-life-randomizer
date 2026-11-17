@@ -157,7 +157,8 @@ def remove_unneccessary_cutscenes(rom_data: RomData, parsed_sym: sym, patch_data
                     f"db $0{endingsEmmun.index('END_DONE')}"
                 )
 
-                if patch_data["romhack_version"] in ["dev"]:                     # D3
+                if patch_data["romhack_version"] in ["dev"]:
+                    # D3
                     offsetAsInt += 6
                     asm_code[f"{bank}/{simple_hex(offsetAsInt, 4)}/"] = "dw setEndFlagsD3beg"
                     asm_code[f"{bank}//setEndFlagsD3beg"] = f"db $0{endingsEmmun.index('END_FLAG')},$53\ndb $0{endingsEmmun.index('END_STEP')},$21"
