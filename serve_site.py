@@ -69,10 +69,10 @@ for file in os.listdir(DIR_START):
             bankCount = 0
             for label, _ in maxes.items():
                 label = label.split("@")[0]
-                addr = parsed_sym.find("label", label).offset
+                addr = parsed_sym.find("label", label)[0].offset
                 size = parsed_sym.find("label", "_sizeof_" + label)
                 if size is not None:
-                    addr += size
+                    addr += size[0]
                 num_hex = hex(0x4000 if addr >= 0x4000 else addr)
                 bank_caves.append(num_hex)
                 print(f"Ending address for bank {hex(bankCount)} is {num_hex}")

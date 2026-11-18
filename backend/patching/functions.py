@@ -18,20 +18,7 @@ def apply_bugfixes(rom_data: RomData, parsed_sym: sym) -> None:
         for line in open("romhack_bugfixes.txt").readlines():
             l = parsed_sym.find("label", line.strip().split(".")[0])
             if l is not None:
-                rom_data.write_bytes(l.address_in_rom(), open(f"bugfixes/{line.strip()}", "rb").read())
-
-def change_language_to_french(parsed_sym: sym, asm_code: dict):
-    addr = parsed_sym.find("label", "saveFile")
-    addr1 = parsed_sym.find("label", "initializeChildOnGameStart").__str__().split(":")[1]
-    intFile_addr = GameboyAddress(addr.bank, addr.offset - 0x10)
-    bank, offset = intFile_addr.__str__().split(":")
-    asm_code[f"{bank}/{offset}/"] = "call changeLangToFrench"
-    asm_code[f"{bank}//changeLangToFrench"] = (
-        "ld a,$01\n"
-        "ld (wActiveLanguage),a\n"
-        f"ld hl,${addr1}\n"
-        "ret"
-    )
+                rom_data.write_bytes(l[0].address_in_rom(), open(f"bugfixes/{line.strip()}", "rb").read())
     
 # helper function that adds param2 to i unless stopped by my base case, which is helpful for finding the right rom address for a certain param in a table despite changes in the disasm code.
 def find_address_for_param_helper(lineNumber, param, param2 = 4, i=0,c=0) -> int:
@@ -50,7 +37,7 @@ def apply_randomized_locations(rom: RomData, patch_data: dict, settings_copy: di
             ):
                 continue
             if location_data['treasure_spawn_mode'] == TREASURE_SPAWN_CHEST and "room" in location_data:
-                table_addr = parsed_sym.find("label", "chestDataGroupTable")
+                table_addr = parsed_sym.find("label", "chestDataGroupTable")[0]
                 chest_addr = rom.get_chest_addr(location_data['room'], table_addr.bank, table_addr.offset)
                 item_name = patch_data["locations"][location_name]
                 item_ids = get_item_id_and_subid(item_name)
@@ -86,11 +73,10 @@ def remove_unneccessary_cutscenes(rom_data: RomData, parsed_sym: sym, patch_data
         if using_onedungeon_version(patch_data):
             groups.append(["group1Map7bObjectData", 0])
         # Change the condition to check for an always set global flag instead of a room flag for the first time marin interaction in a dream.
-        marineHumanScriptAddr = parsed_sym.find("label", "marineHumanScript")
+        marineHumanScriptAddr = parsed_sym.find("label", "marineHumanScript")[0]
         bank, offset = marineHumanScriptAddr.__str__().split(":")
         asm_code[f"{bank}/{simple_hex(int(offset, 16) + 1, 4)}/"] = "db jumpifglobalflagset,$58"
         if patch_data["romhack_version"] not in ["0.1", "0.2"]:
-            # Set roomflag 40 to all rooms with a cutscene in them because the creator set them up to check that flag.
             if not using_onedungeon_version(patch_data):
                 # D1
                 groups[0].append([0xe7, 0x05]) # Give the ending script to the starting bird (May change depending on what happens in the future).
@@ -101,12 +87,12 @@ def remove_unneccessary_cutscenes(rom_data: RomData, parsed_sym: sym, patch_data
                 if patch_data["romhack_version"] in ["dev"]:
                     arr.append("praise")
                 for s in arr: # Same thing with the praise block
-                    praiseAddr = parsed_sym.find("label", s)
+                    praiseAddr = parsed_sym.find("label", s)[0]
                     bank, offset = praiseAddr.__str__().split(":")
                     asm_code[f"{bank}/{offset}/"] = "jp interactionDelete"
 
                 # Give the user the dream notebook without a cutscene sequence.
-                marineToBeContinuedScriptGoAddr = parsed_sym.find("label", "marineToBeContinuedScript@go")
+                marineToBeContinuedScriptGoAddr = parsed_sym.find("label", "marineToBeContinuedScript@go")[0]
                 bank, offset = marineToBeContinuedScriptGoAddr.__str__().split(":")
                 offsetAsInt = int(offset, 16)
                 asm_code[f"{bank}/{simple_hex(offsetAsInt + 4, 4)}/"] = ( # TODO: dream notebook check
@@ -118,7 +104,7 @@ def remove_unneccessary_cutscenes(rom_data: RomData, parsed_sym: sym, patch_data
                 asm_code[f"{bank}/{simple_hex(offsetAsInt + 31, 4)}/"] = f"db $81" # (wWarpDestGroup) And here.
 
                 # Skips the text and sets some flags for jingle island ontop of the marin ending beach script.
-                marinEndingBeachAddr = parsed_sym.find("label", "marineEndingScript@beach")
+                marinEndingBeachAddr = parsed_sym.find("label", "marineEndingScript@beach")[0]
                 bank, offset = marinEndingBeachAddr.__str__().split(":")
                 offsetAsInt = int(offset, 16)
                 asm_code[f"{bank}/{offset}/"] = (
@@ -134,7 +120,7 @@ def remove_unneccessary_cutscenes(rom_data: RomData, parsed_sym: sym, patch_data
 
                 # D2
                 # Start with modifying the d2 portion of the endings block before going down the line.
-                chapterEndingAddr = parsed_sym.find("label", "chapterEnding@endings")
+                chapterEndingAddr = parsed_sym.find("label", "chapterEnding@endings")[0]
                 bank, offset = chapterEndingAddr.__str__().split(":")
                 offsetAsInt = int(offset, 16) + 4
                 asm_code[f"{bank}/{simple_hex(offsetAsInt, 4)}/"] = "dw setEndFlagsD2beg"
@@ -165,14 +151,14 @@ def remove_unneccessary_cutscenes(rom_data: RomData, parsed_sym: sym, patch_data
                             offsetAsInt += 6
 
             if patch_data["romhack_version"] not in ["0.3.1", "0.3"]: # Remove the jack dialog from the game.
-                marineHumanScriptAddr = parsed_sym.find("label", "marineJackScript")
+                marineHumanScriptAddr = parsed_sym.find("label", "marineJackScript")[0]
                 bank, offset = marineHumanScriptAddr.__str__().split(":")
                 asm_code[f"{bank}/{simple_hex(int(offset, 16) + 1, 4)}/"] = "db scriptend"
             set_room_flags(0x40, rooms_for_applyflag40, rom_flags)
         for info in groups:
             l = parsed_sym.find("label", info[0])
             if l is not None: # Places set interactions inside a room.
-                rom_data.write_bytes(l.address_in_rom() + find_address_for_param_helper(info[1], -1), [0xff] if not value_in_index(info, 2) else info[2])
+                rom_data.write_bytes(l[0].address_in_rom() + find_address_for_param_helper(info[1], -1), [0xff] if not value_in_index(info, 2) else info[2])
 
 def set_room_flags(flag: int, rooms: int | list[int], rom_flags: RomGlobalFlags):
     if not isinstance(rooms, list) and isinstance(rooms, int):
@@ -192,7 +178,7 @@ def value_in_index(arr: list, index: int):
         return False
 
 def add_warp_to_start(parsed_sym: sym, asm_code: dict):
-    menuFadeAddr = parsed_sym.find("label", "menuStateFadeIntoMenu")
+    menuFadeAddr = parsed_sym.find("label", "menuStateFadeIntoMenu")[0]
     bank, offset = menuFadeAddr.__str__().split(":")
     offsetAsInt = int(f"0x{offset}", 0)
     asm_code[f"{bank}/{simple_hex(offsetAsInt + 26, 4)}/"] = "call checkWarpToStart"
@@ -205,9 +191,9 @@ def add_warp_to_start(parsed_sym: sym, asm_code: dict):
         "ld a,$01\n"
         "set 7,a\n"
         "ld (wWarpDestGroup),a\n"
-        "ld a,$aa        ; room ID\n"
+        f"ld a,$aa        ; room ID\n"
         "ld (wWarpDestRoom),a\n"
-        "ld a,$42         ; Position in a room\n"
+        f"ld a,$42         ; Position in a room\n"
         "ld (wWarpDestPos),a\n"
         "ld a,$05\n"
         "ld (wWarpTransition),a\n"
@@ -215,7 +201,12 @@ def add_warp_to_start(parsed_sym: sym, asm_code: dict):
         "ld (wWarpTransition2),a\n"
         "ld a,$ff\n"
         "ld (wDisabledObjects),a\n"
-        
+
+        "ld a,SND_TELEPORT\n"
+        "call playSound\n"
+    
+        "ld a,$03\n"
+        "call setMusicVolume\n"
         "call clearStaticObjects\n"
         
         "ld a,$d0\n"
@@ -253,7 +244,7 @@ def modify_dream_timer(patch_data: dict, parsed_sym: sym, asm_code: dict):
     for c in code_array:
         code += c
     frames = 60 * int(patch_data["dream_timer"])
-    interactionCodee9State0Addr = parsed_sym.find("label", "interactionCodee9@state0")
+    interactionCodee9State0Addr = parsed_sym.find("label", "interactionCodee9@state0")[0]
     bank = interactionCodee9State0Addr.__str__().split(":")[0]
     frame_array = [0, 0] if patch_data["disable_dream_timer"] else [
         simple_hex(0xff), simple_hex(0xff)

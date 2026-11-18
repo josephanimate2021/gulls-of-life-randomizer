@@ -185,8 +185,8 @@ class Randomizer():
         bank_caves = [int(i, 0) for i in json.loads(open("romhack.json").read())]
         bank_caves[0x14] = 0x3c99 # Manually modifying bank 14 because the size of a function in there is oversized.
         
-        ringMenuBeg = parsed_sym.find("label", "runRingMenu")
-        ringMenuEnd = parsed_sym.find("label", "saveQuitMenu_checkIsGameOver")
+        ringMenuBeg = parsed_sym.find("label", "runRingMenu")[0]
+        ringMenuEnd = parsed_sym.find("label", "saveQuitMenu_checkIsGameOver")[0]
         bank_caves[ringMenuBeg.bank] = [
             [ringMenuBeg.offset, ringMenuEnd.offset], # Using the ring menu since this hack dosen't use rings. (Gives us lots of space here)
             bank_caves[ringMenuBeg.bank] # end of bank
@@ -195,14 +195,14 @@ class Randomizer():
         if patch_data["romhack_version"] in ["dev"] and not (
             patch_data["show_ballade_cutscenes"] or patch_data["vanilaize_rom"]
         ):
-            arrivalTalkAddr = parsed_sym.find("label", "arrivalTalk")
-            arrivalTalkAddrEnd = parsed_sym.find("label", "raft")
+            arrivalTalkAddr = parsed_sym.find("label", "arrivalTalk")[0]
+            arrivalTalkAddrEnd = parsed_sym.find("label", "raft")[0]
             bank_caves[arrivalTalkAddr.bank] = [
                 [arrivalTalkAddr.offset + 3, arrivalTalkAddrEnd.offset],
                 bank_caves[arrivalTalkAddr.bank] # end of bank
             ]
-            praiseAddr = parsed_sym.find("label", "praise")
-            praiseAddrEnd = parsed_sym.find("label", "raft")
+            praiseAddr = parsed_sym.find("label", "praise")[0]
+            praiseAddrEnd = parsed_sym.find("label", "kissCheck")[0]
             bank_caves[praiseAddr.bank] = [
                 [praiseAddr.offset + 3, praiseAddrEnd.offset],
                 bank_caves[praiseAddr.bank] # end of bank
@@ -222,7 +222,7 @@ class Randomizer():
             if patch_data["romhack_version"] not in ["0.2", "0.1"]:
                 modify_dream_timer(patch_data, parsed_sym, asm_code)
         if patch_data["apply_fr_lang"] and patch_data["romhack_version"] not in ["0.1", "0.2"]:
-            init_flags.insert_code("ld a,$01\nld (wActiveLanguage),a\n")
+            init_flags.insert_code("ld a,$01\nld (wActiveLanguage),a")
         # Sets an initial flag that allows the player to use their bombs with marin the seagull early (Will not do anything on versions below 1.0/2).
         init_flags.insert_code("ld a,$58\ncall setGlobalFlag") # GLOBALFLAG_BALLADE_MARINE_BOMB
 
