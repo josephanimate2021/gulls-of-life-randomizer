@@ -34,3 +34,16 @@ for d in DUNGEON_NAMES:
         f"Master Key ({d})",
         f"Boss Key ({d})"
     ])
+
+# Use this if you want to tell the endings block how to behave without getting confused. 
+# It should go without saying that the list starts at zero and ends at 5, and there's 6 total functions here.
+# Use ENDINGS_ENUM.index(<function_name>) to give out an index for your function.
+ENDINGS_ENUM = [
+    "END_DONE",
+    "END_TEXT",
+    "END_WARP",
+    "END_FLAG",
+    "END_STEP",
+    "END_SOUND",
+    "END_WAIT"
+]

@@ -85,12 +85,10 @@ def remove_unneccessary_cutscenes(rom_data: RomData, parsed_sym: sym, patch_data
         rooms_for_applyflag40 = [] # for cutscenes with INTERAC_MARINE (and a few others)
         if using_onedungeon_version(patch_data):
             groups.append(["group1Map7bObjectData", 0])
-        if patch_data["romhack_version"] not in ["dev"]:
-            groups.append(["group2Map9eObjectData", 0])
-        else: # Change the condition to check for an always set global flag instead of a room flag for the first time marin interaction in a dream.
-            marineHumanScriptAddr = parsed_sym.find("label", "marineHumanScript")
-            bank, offset = marineHumanScriptAddr.__str__().split(":")
-            asm_code[f"{bank}/{simple_hex(int(offset, 16) + 1, 4)}/"] = "db jumpifglobalflagset,$58"
+        # Change the condition to check for an always set global flag instead of a room flag for the first time marin interaction in a dream.
+        marineHumanScriptAddr = parsed_sym.find("label", "marineHumanScript")
+        bank, offset = marineHumanScriptAddr.__str__().split(":")
+        asm_code[f"{bank}/{simple_hex(int(offset, 16) + 1, 4)}/"] = "db jumpifglobalflagset,$58"
         if patch_data["romhack_version"] not in ["0.1", "0.2"]:
             # Set roomflag 40 to all rooms with a cutscene in them because the creator set them up to check that flag.
             if not using_onedungeon_version(patch_data):
@@ -136,29 +134,20 @@ def remove_unneccessary_cutscenes(rom_data: RomData, parsed_sym: sym, patch_data
 
                 # D2
                 # Start with modifying the d2 portion of the endings block before going down the line.
-                endingsEmmun = [
-                    "END_DONE",
-                    "END_TEXT",
-                    "END_WARP",
-                    "END_FLAG",
-                    "END_STEP",
-                    "END_SOUND",
-                    "END_WAIT",
-                ]
                 chapterEndingAddr = parsed_sym.find("label", "chapterEnding@endings")
                 bank, offset = chapterEndingAddr.__str__().split(":")
                 offsetAsInt = int(offset, 16) + 4
                 asm_code[f"{bank}/{simple_hex(offsetAsInt, 4)}/"] = "dw setEndFlagsD2beg"
                 asm_code[f"{bank}//setEndFlagsD2beg"] = (
-                    f"db $0{endingsEmmun.index('END_SOUND')},$d0\n"
-                    f"db $0{endingsEmmun.index('END_FLAG')},$52\n"
-                    f"db $0{endingsEmmun.index('END_STEP')},$11"
+                    f"db $0{ENDINGS_ENUM.index('END_SOUND')},$d0\n"
+                    f"db $0{ENDINGS_ENUM.index('END_FLAG')},$52\n"
+                    f"db $0{ENDINGS_ENUM.index('END_STEP')},$11"
                 )
                 offsetAsInt += 6
                 asm_code[f"{bank}/{simple_hex(offsetAsInt, 4)}/"] = "dw setEndFlagsD2End"
                 asm_code[f"{bank}//setEndFlagsD2End"] = (
-                    f"db $0{endingsEmmun.index('END_STEP')},$00\n"
-                    f"db $0{endingsEmmun.index('END_DONE')}"
+                    f"db $0{ENDINGS_ENUM.index('END_STEP')},$00\n"
+                    f"db $0{ENDINGS_ENUM.index('END_DONE')}"
                 )
 
                 if patch_data["romhack_version"] in ["dev"]:
@@ -171,7 +160,7 @@ def remove_unneccessary_cutscenes(rom_data: RomData, parsed_sym: sym, patch_data
                     for i in range(3, 8):
                         offsetAsInt += 6
                         asm_code[f"{bank}/{simple_hex(offsetAsInt, 4)}/"] = f"dw setEndFlagsD{i}"
-                        asm_code[f"{bank}//setEndFlagsD{i}"] = f"db $0{endingsEmmun.index('END_SOUND')},{snds[i - 3]}\ndb $0{endingsEmmun.index('END_FLAG')},$5{i}\ndb $0{endingsEmmun.index('END_DONE')}"
+                        asm_code[f"{bank}//setEndFlagsD{i}"] = f"db $0{ENDINGS_ENUM.index('END_SOUND')},{snds[i - 3]}\ndb $0{ENDINGS_ENUM.index('END_FLAG')},$5{i}\ndb $0{ENDINGS_ENUM.index('END_DONE')}"
                         if i == 3: # Special case for d3.
                             offsetAsInt += 6
 
