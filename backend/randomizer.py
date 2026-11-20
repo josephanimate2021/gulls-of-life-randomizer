@@ -19,12 +19,19 @@ class Randomizer():
         self.location_data = {}
         self.rando_settings = {}
 
-    def get_filler_item(self, consider_dungeon):
+    def get_filler_item(self, d: int | None = None):
         filler_items = []
         for p, vv in ITEMS_DATA.items():
             if vv["classification"] == ItemClassification.filler:
-                if consider_dungeon is None or p not in DUNGEON_ITEM_NAMES or DUNGEON_NAMES.index(p.split("(")[1].split(")")[0]) == consider_dungeon:
-                    filler_items.append(p)
+                if d is None:
+                    if p not in DUNGEON_ITEM_NAMES:
+                        filler_items.append(p)
+                else:
+                    if p in DUNGEON_ITEM_NAMES:
+                        if p.endswith(f"({DUNGEON_NAMES[d]})"):
+                            filler_items.append(p)
+                    else:
+                        filler_items.append(p)
         return random.choice(filler_items)
 
     def generate_seed(self, settings: dict):
@@ -41,7 +48,7 @@ class Randomizer():
 
         # Shuffle locations if the seed dosen't contain any.
         if len(settings["locations"]) == 0:
-            def shuffle_locations(fill_loc_data):
+            def shuffle_locations(fill_loc_data: bool = False):
                 van_items = []
                 for location, info in locations_data.items():
                     if (
@@ -63,17 +70,74 @@ class Randomizer():
             if not self.settings_copy["shuffle_items"]:
                 print("Using Vanila Locations because item shuffling was not selected.")
             else: # Run the randomizer if shuffle items or shuffle_all is enabled.
+                # Pre fill dungeon items before running the randomizer logic.
+                arr = list(settings["locations"].keys())
+                i = 0
+                print("Running Prefill...")
+                while i != len(arr):
+                    loc = arr[i]
+                    item = settings["locations"][loc]
+                    arr2 = []
+                    if "dungeon" not in self.location_data[loc]:
+                        if (
+                            (
+                                (
+                                    item.startswith("Dungeon Map")
+                                    or item.startswith("Compass")
+                                )
+                            ) or (
+                                (
+                                    item.startswith("Small Key")
+                                    or item.startswith("Boss Key")
+                                ) and not settings["keysanity"]
+                            )
+                        ):
+                            arr2.append(67)
+                            settings["locations"][loc] = self.get_filler_item()
+                            i = -1
+                    else:
+                        d = self.location_data[loc]["dungeon"]
+                        if len(arr2) > 0:
+                            ditems = [
+                                "Small Key",
+                                "Boss Key",
+                                "Dungeon Map",
+                                "Compass"
+                            ]
+                            settings["locations"][loc] = f"{random.choice(ditems)} ({DUNGEON_NAMES[d]})"
+                            arr2.pop()
+                            i = -1
+                        if item in DUNGEON_ITEM_NAMES and not item.endswith(f"({DUNGEON_NAMES[d]})"):
+                            if (
+                                (
+                                    item.startswith("Small Key")
+                                    or item.startswith("Boss Key")
+                                ) and not settings["keysanity"]
+                            ) or (
+                                (
+                                    item.startswith("Dungeon Map")
+                                    or item.startswith("Compass")
+                                ) # TODO: Implement dungeon map/compass sanity.
+                            ):
+                                settings["locations"][loc] = item.split("(")[0] + f"({DUNGEON_NAMES[d]})"
+                                i = -1
+                    i += 1
+                print("Successfully ran the prefill script!", settings["locations"])
                 if settings["logic"] != "none": # Run the actual randomizer logic
                     locations_in_logic = {}
+                    outside_locations = {}
                     self.temp_locations = {}
+                    self.post_check = False
                     in_dungeon = False
                     self.gen_attempts = 0
+                    gen_limit = 3
                     self.loc_count = 0
                     self.loc_array = list(self.location_data.keys())
-                    print(self.location_data, self.loc_array)
                     self.modifed_locs = []
-                    while self.loc_count != len(self.loc_array):
-                        print(f"Generation #{self.loc_count}")
+                    while True:
+                        if self.loc_count == len(self.loc_array) or self.gen_attempts == gen_limit:
+                            break
+                        print(f"Generation Attempt #{self.gen_attempts + 1}")
                         if self.loc_count == 0:
                             self.modifed_locs = []
                             self.temp_locations = {}
@@ -82,15 +146,26 @@ class Randomizer():
                         if not settings["keysanity"]:
                             if "dungeon" in data and not in_dungeon:
                                 in_dungeon = True
-                                self.temp_locations = {}
+                                self.temp_locations = {} # Ensure that dungeon related items stay within their own dungeon.
                             elif in_dungeon:
                                 in_dungeon = False
-                                self.temp_locations = {}
                         def append_loc():
                             self.temp_locations[loic] = settings["locations"][loic]
-                            locations_in_logic[loic] = self.temp_locations[loic]
+                            if not self.post_check:
+                                locations_in_logic[loic] = self.temp_locations[loic]
+                            if not in_dungeon:
+                                outside_locations[loic] = locations_in_logic[loic]
                             self.loc_count += 1
+                            if self.loc_count == len(self.loc_array) - 1 and not self.post_check:
+                                for loc in settings["locations"].keys(): # Append any missing locations before running a final check.
+                                    if loc not in locations_in_logic: 
+                                        locations_in_logic[loc] = settings["locations"][loc]
+                                self.post_check = True
+                                self.loc_count = 0
+                                print(f"Running final checks (attempt {self.gen_attempts + 1} is almost done).")
+                                self.gen_attempts = 0
                             return True
+                        
                         if data["requirements"] is not None:
                             if len(locations_in_logic) == 0:
                                 raise Exception("There needs to be at least one location in there that dosen't require logic in order to continue filling locations.")
@@ -98,7 +173,6 @@ class Randomizer():
                                 for type, arr in r.items():
                                     for i in range(len(arr)):
                                         req = arr[i]
-                                        print(req, locations_in_logic)
                                         if isinstance(req, dict) and recuursive_loop(req):
                                             if type == "any" or i == len(arr) - 1:
                                                 return True
@@ -120,16 +194,40 @@ class Randomizer():
                                         for loc in settings["locations"].keys():
                                             if settings["locations"][loc] == item:
                                                 settings["locations"][loc] = self.get_filler_item(data["dungeon"] if "dungeon" in data else None)
-                                        print(item_count, req_ct, item_count == req_ct)
                                         if item_count < req_ct:
                                             # Attempt to find locations with junk items to replace with logical items relative to them.
                                             junk_locs = []
                                             for l in locations_in_logic.keys():
                                                 if ITEMS_DATA[locations_in_logic[l]]['classification'] == ItemClassification.filler:
                                                     junk_locs.append(l)
-                                            print(junk_locs)
+                                            if len(junk_locs) > 0 and (
+                                                item.startswith("Small Key")
+                                                or item.startswith("Boss Key")
+                                            ) and not settings["keysanity"]:
+                                                arr2 = []
+                                                for loc in junk_locs:
+                                                    if (
+                                                        "dungeon" in self.location_data[loc] 
+                                                        and self.location_data[loc]["dungeon"] == data["dungeon"]
+                                                    ):
+                                                        arr2.append(loc)
+                                                junk_locs = arr2
                                             if len(junk_locs) == 0: # If nothing is found, use what we gathered so far.
                                                 junk_locs = list(self.temp_locations.keys())
+                                            if len(junk_locs) == 0: # Use outside locations if any.
+                                                junk_locs = list(outside_locations.keys())
+                                            if len(junk_locs) == 0: # Likely bad RNG. try shuffling again.
+                                                if type == "any" and i != len(arr) - 1:
+                                                    continue
+                                                settings["locations"] = {}
+                                                print("Hit some bad RNG. trying again...")
+                                                self.gen_attempts += 1
+                                                self.post_check = False
+                                                shuffle_locations()
+                                                self.loc_count = 0
+                                                for i in list(locations_in_logic.keys()):
+                                                    del locations_in_logic[i]
+                                                return True
                                             for _ in range(item_count, req_ct):
                                                 rando_loc = ""
                                                 while True:
@@ -152,24 +250,12 @@ class Randomizer():
                             recuursive_loop(data["requirements"])
                         else:
                             append_loc()
-
+                    if self.gen_attempts == gen_limit:
+                        raise Exception(f"Seed generation cannot continue any futher. All {gen_limit} attempts were used up. Please try generating your seed again.")
                     settings["locations"] = locations_in_logic
                     print(locations_in_logic)
-                else:
-                    while not settings["keysanity"]: # Ensure that small or boss keys are within their dungeons in no logic seeds.
-                        for location in list(settings["locations"].keys()):
-                            item = settings["locations"][location]
-                            if (
-                                item.startswith("Small Key")
-                                or item.startswith("Boss Key")
-                            ) and ("dungeon" not in self.location_data[location] or not item.endswith(f"({DUNGEON_NAMES[self.location_data[location]['dungeon']]})")):
-                                settings["locations"] = {}
-                                shuffle_locations(False)
-                                break
-                        if len(settings["locations"]) == len(self.location_data):
-                            break
         open("settings_copy.json", "w").write(json.dumps(self.settings_copy))
-        return open("rando_settings.json").read()
+        return json.dumps(settings)
 
     def patch_rom(self, patch_data: dict) -> dict[str, str]:
         # Define variables

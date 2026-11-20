@@ -21,7 +21,7 @@ ITEMS_DATA = {
         'id': 0x05,
         'hidden': True
     },
-    "Boomerang": {
+    "Spinning Boomerang": {
         'classification': ItemClassification.progression,
         'id': 0x06,
         'subid': 0x04
@@ -31,11 +31,16 @@ ITEMS_DATA = {
         'id': 0x11,
         'subid': 0x02                                                                                                          
     },
-    "Switch Hook": {
+    "Dream Notebook": {
+        'classification': ItemClassification.progression, # Not actually needed, but will be implemented as a filler item once collect mode is implemented.
+        'id': 0x12,
+        'hidden': True                                                                                                        
+    },
+    "Echo Hook": {
         'classification': ItemClassification.progression,
         'id': 0x0a
     },
-    "Cane of Somaria": {
+    "Cane of Dreams": {
         'classification': ItemClassification.progression,
         'id': 0x04
     },
@@ -149,7 +154,7 @@ ITEMS_DATA = {
         'hidden': True
     },
     "Potion": {
-        'classification': ItemClassification.filler,
+        'classification': ItemClassification.progression,
         'id': 0x2f,
         'hidden': True
     },
@@ -409,10 +414,10 @@ ITEMS_DATA = {
     #     },
 
     # TODO: Trade Items (if any)
-    "Poe Clock": {
-        'classification': ItemClassification.progression_skip_balancing,
-        'id': 0x3d,
-        'hidden': True
+    "Sir Cork": {
+        'classification': ItemClassification.filler, # Not actually needed, but in the vanila game you would probably think that this is the only item that allowed you to dream on jingle island after giving the item to lila.
+        'id': 0x41,
+        'subid': 0x0c
     },
     "Stationery": {
         'classification': ItemClassification.progression_skip_balancing,

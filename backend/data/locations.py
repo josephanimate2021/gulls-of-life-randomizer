@@ -1,11 +1,18 @@
 from .constants import *
 from .logic.logic_predicates import *
 
+# Setup in gameplay order.
 locations_data = {
     #"Mist Island (Real World): Hardhat Worker": { Leaving this guy alone for now.
         #"vanila_item": "Sword",
         #"requirements": None, # None indicates that the location is always accessible from the last point, which is why we start from the top of the list and work our way down. If a location is not always accessible, we will need to add requirements for it.
-        #"npc_itemGiveScript_addr": 0x000a + "+balladeNpc01Script@loop",
+        #"shortName": "mistWorker",
+        #"treasure_spawn_mode": TREASURE_SPAWN_INSTANT
+    #},
+    #"Mist Island (Real World): Shop": { TODO
+        #"vanila_item": "Potion",
+        #"requirements": None, # None indicates that the location is always accessible from the last point, which is why we start from the top of the list and work our way down. If a location is not always accessible, we will need to add requirements for it.
+        #"shortName": "mistShop",
         #"treasure_spawn_mode": TREASURE_SPAWN_INSTANT
     #},
     "Dark Lighthouse: Chest By Blue Statue": {
@@ -26,11 +33,7 @@ locations_data = {
     },
     "Dark Lighthouse: Chest Around Armos": {
         "vanila_item": "Small Key (Dark Lighthouse)",
-        "requirements": {
-            "all": [
-                ("Sword", 1)
-            ]
-        },
+        "requirements": require_kill_normal_enemy(True),
         "not_compatiable_versions": ["1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
         "room": 0x041e,
         "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
@@ -119,9 +122,105 @@ locations_data = {
                 has_boss_key(1)
             ]
         },
-        "room": 0x0413,
+        "shortName": "d1Boss",
         "treasure_spawn_mode": TREASURE_SPAWN_POOF,
         "dungeon": 1
     },
-    #TODO: Essence checks (soon) and others once D1 checks and logic is fully stable.
+    #TODO: Essence check (d1).
+     #"Mist Island (Real World): D1 Ending Cutscene": { TODO
+     #  "vanila_item": "Dream Notebook",
+      # "requirements": None,
+        #"treasure_spawn_mode": TREASURE_SPAWN_INSTANT,
+        #"shortName": "dreamNotebookCheck"
+        #"not_compatiable_versions": ["1.0_1.1", "1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
+    #}
+    #"Jingle Island (Real World): Shop": { TODO
+     #  "vanila_item": "Bombs (10)",
+      # "requirements": None,
+        #"treasure_spawn_mode": TREASURE_SPAWN_INSTANT,
+        #"shortName": "jingleIslandShop"
+        #"not_compatiable_versions": ["1.0_1.1", "1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
+    #}
+    "Jingle Island (Real World): Chest Across Pit": {
+        "vanila_item": "Sir Cork",
+        "requirements": {
+            "all": [
+                ("Bombs (10)", 1)
+            ]
+        },
+        "room": 0x05b0,
+        "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
+        "not_compatiable_versions": ["1.0_1.1", "1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
+    },
+    "Toy Chest: Compass Chest": {
+        "vanila_item": "Compass (Toy Chest)",
+        "requirements": None,
+        "room": 0x043a,
+        "dungeon": 2,
+        "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
+        "not_compatiable_versions": ["1.0_1.1", "1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
+    },
+    "Toy Chest: Map Chest": {
+        "vanila_item": "Dungeon Map (Toy Chest)",
+        "requirements": None,
+        "room": 0x043b,
+        "dungeon": 2,
+        "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
+        "not_compatiable_versions": ["1.0_1.1", "1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
+    },
+    "Toy Chest: Small Key Drop": {
+        "vanila_item": "Small Key (Toy Chest)",
+        "requirements": require_kill_normal_enemy(True),
+        "room": 0x0437,
+        "dungeon": 2,
+        "treasure_spawn_mode": TREASURE_SPAWN_DROP,
+        "not_compatiable_versions": ["1.0_1.1", "1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
+    },
+    "Toy Chest: Chest Across Pit": {
+        "vanila_item": "Small Key (Toy Chest)",
+        "requirements": {
+            "all": [
+                has_small_keys(2, 1)
+            ]
+        },
+        "dungeon": 2,
+        "room": 0x0434,
+        "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
+        "not_compatiable_versions": ["1.0_1.1", "1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
+    },
+    "Toy Chest: Bommorang Chest": {
+        "vanila_item": "Spinning Boomerang",
+        "requirements": None,
+        "room": 0x0431,
+        "dungeon": 2,
+        "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
+        "not_compatiable_versions": ["1.0_1.1", "1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
+    },
+    "Toy Chest: Miniboss": {
+        "vanila_item": "Boss Key (Toy Chest)",
+        "requirements": {
+            "all": [
+                require_generic_boss_and_miniboss_kill(True),
+                has_small_keys(2, 2),
+                ("Spinning Boomerang", 1)
+            ]
+        },
+        "room": 0x042c,
+        "dungeon": 2,
+        "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
+        "not_compatiable_versions": ["1.0_1.1", "1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
+    },
+    "Toy Chest: Boss": {
+        "vanila_item": "Heart Container",
+        "requirements": {
+            "all": [
+                has_boss_key(2)
+            ]
+        },
+        "shortName": "d2Boss",
+        "treasure_spawn_mode": TREASURE_SPAWN_POOF,
+        "dungeon": 2,
+        "not_compatiable_versions": ["1.0_1.1", "1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
+    },
+    # TODO: Essence check (D2) and others in the dev build.
 }

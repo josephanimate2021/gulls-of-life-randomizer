@@ -46,6 +46,11 @@ def apply_randomized_locations(rom: RomData, patch_data: dict, settings_copy: di
                     or item_name.startswith("Boss Key")
                 ) and not patch_data["keysanity"]:
                     item_ids[1] = 0x03
+                if (
+                    item_name.startswith("Dungeon Map")
+                    or item_name.startswith("Compass")
+                ): # TODO: implement compass/map sanity.
+                    item_ids[1] = 0x02
                 print(item_name, item_ids)
                 rom.write_bytes(chest_addr, item_ids)
             else:
