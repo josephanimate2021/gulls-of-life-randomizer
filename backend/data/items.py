@@ -147,11 +147,15 @@ ITEMS_DATA = {
         'id': 0x2b,
         'subid': 0x01
     },
-    "Progressive Flippers": {
+    "Zora's Flippers": {
         'classification': ItemClassification.progression,
         'id': 0x2e,
         'subid': 0x01,
         'hidden': True
+    },
+    "Mermaid Suit": {
+        'classification': ItemClassification.progression,
+        'id': 0x4a
     },
     "Potion": {
         'classification': ItemClassification.progression,

@@ -87,7 +87,8 @@ locations_data = {
         "vanila_item": "Small Key (Dark Lighthouse)",
         "requirements": {
             "all": [
-                has_small_keys(1, 2), # Keeping this in despite the oldest version being present to prevent softlocks.
+                has_small_keys(1, 2l), 
+                require_generic_boss_and_miniboss_kill(True)
             ]
         },
         "not_compatiable_versions": ["0.3.1", "0.3", "0.2", "0.1"],
@@ -132,15 +133,22 @@ locations_data = {
       # "requirements": None,
         #"treasure_spawn_mode": TREASURE_SPAWN_INSTANT,
         #"shortName": "dreamNotebookCheck"
-        #"not_compatiable_versions": ["1.0_1.1", "1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
+        #"compatiable_versions": ["1.0_2", "dev"],
     #}
     #"Jingle Island (Real World): Shop": { TODO
      #  "vanila_item": "Bombs (10)",
       # "requirements": None,
         #"treasure_spawn_mode": TREASURE_SPAWN_INSTANT,
         #"shortName": "jingleIslandShop"
-        #"not_compatiable_versions": ["1.0_1.1", "1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
+        #"compatiable_versions": ["1.0_2", "dev"],
     #}
+    "Jingle Island (Real World): Chest On Seperate Island": {
+        "vanila_item": "Rupees (50)",
+        "requirements": None,
+        "room": 0x0113,
+        "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
+        "compatiable_versions": ["dev"],
+    },
     "Jingle Island (Real World): Chest Across Pit": {
         "vanila_item": "Sir Cork",
         "requirements": {
@@ -150,7 +158,7 @@ locations_data = {
         },
         "room": 0x05b0,
         "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
-        "not_compatiable_versions": ["1.0_1.1", "1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
+        "compatiable_versions": ["1.0_2", "dev"],
     },
     "Toy Chest: Compass Chest": {
         "vanila_item": "Compass (Toy Chest)",
@@ -158,7 +166,7 @@ locations_data = {
         "room": 0x043a,
         "dungeon": 2,
         "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
-        "not_compatiable_versions": ["1.0_1.1", "1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
+        "compatiable_versions": ["1.0_2", "dev"],
     },
     "Toy Chest: Map Chest": {
         "vanila_item": "Dungeon Map (Toy Chest)",
@@ -166,16 +174,16 @@ locations_data = {
         "room": 0x043b,
         "dungeon": 2,
         "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
-        "not_compatiable_versions": ["1.0_1.1", "1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
+        "compatiable_versions": ["1.0_2", "dev"],
     },
-    "Toy Chest: Small Key Drop": {
-        "vanila_item": "Small Key (Toy Chest)",
-        "requirements": require_kill_normal_enemy(True),
-        "room": 0x0437,
-        "dungeon": 2,
-        "treasure_spawn_mode": TREASURE_SPAWN_DROP,
-        "not_compatiable_versions": ["1.0_1.1", "1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
-    },
+    #"Toy Chest: Small Key Drop": { TODO
+        #"vanila_item": "Small Key (Toy Chest)",
+        #"requirements": require_kill_normal_enemy(True),
+        #"room": 0x0437,
+        #"dungeon": 2,
+        #"treasure_spawn_mode": TREASURE_SPAWN_DROP,
+        #"compatiable_versions": ["1.0_2", "dev"],
+    #},
     "Toy Chest: Chest Across Pit": {
         "vanila_item": "Small Key (Toy Chest)",
         "requirements": {
@@ -186,7 +194,7 @@ locations_data = {
         "dungeon": 2,
         "room": 0x0434,
         "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
-        "not_compatiable_versions": ["1.0_1.1", "1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
+        "compatiable_versions": ["1.0_2", "dev"],
     },
     "Toy Chest: Bommorang Chest": {
         "vanila_item": "Spinning Boomerang",
@@ -194,7 +202,7 @@ locations_data = {
         "room": 0x0431,
         "dungeon": 2,
         "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
-        "not_compatiable_versions": ["1.0_1.1", "1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
+        "compatiable_versions": ["1.0_2", "dev"],
     },
     "Toy Chest: Miniboss": {
         "vanila_item": "Boss Key (Toy Chest)",
@@ -208,7 +216,7 @@ locations_data = {
         "room": 0x042c,
         "dungeon": 2,
         "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
-        "not_compatiable_versions": ["1.0_1.1", "1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
+        "compatiable_versions": ["1.0_2", "dev"],
     },
     "Toy Chest: Boss": {
         "vanila_item": "Heart Container",
@@ -220,7 +228,99 @@ locations_data = {
         "shortName": "d2Boss",
         "treasure_spawn_mode": TREASURE_SPAWN_POOF,
         "dungeon": 2,
-        "not_compatiable_versions": ["1.0_1.1", "1.0_1", "0.3.1", "0.3", "0.2", "0.1"],
+        "compatiable_versions": ["1.0_2", "dev"],
     },
-    # TODO: Essence check (D2) and others in the dev build.
+    # TODO: Essence check (D2)
+    "Lagoon Island (Real World): Chest Inside Cave": {
+        "vanila_item": "Rupees (20)",
+        "requirements": None,
+        "room": 0x05b1,
+        "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
+        "compatiable_versions": ["dev"],
+    },
+    #"Lagoon Island (Real World): Bottle Check": { TODO
+        #"vanila_item": "Letter In a Bottle",
+        #"requirements": None,
+        #"room": 0x0115,
+        #"treasure_spawn_mode": TREASURE_SPAWN_INSTANT,
+        #"compatiable_versions": ["dev"],
+    #},
+    #"Lagoon Island (Real World): Trade In Bottle": {
+        #"vanila_item": "Progressive Flippers",
+        #"requirements": {
+            #"all": [
+                #("Letter In a Bottle", 1)
+            #]
+        #},
+        #"shortName": "bottleTrade",
+        #"treasure_spawn_mode": TREASURE_SPAWN_INSTANT,
+        #"compatiable_versions": ["dev"],
+    #},
+    "Murmuring Reef: Dungeon Map Chest": {
+        "vanila_item": "Dungeon Map (Murmuring Reef)",
+        "requirements": None,
+        "room": 0x0540,
+        "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
+        "dungeon": 3,
+        "compatiable_versions": ["dev"],
+    },
+    #"Murmuring Reef: Small Key Drop": {
+        #"vanila_item": "Small Key (Murmuring Reef)",
+        #"requirements": None,
+        #"room": 0x053e,
+        #"treasure_spawn_mode": TREASURE_SPAWN_DROP,
+        #"compatiable_versions": ["dev"],
+    #},
+    "Murmuring Reef: Compass Chest": {
+        "vanila_item": "Compass (Murmuring Reef)",
+        "requirements": None,
+        "room": 0x053a,
+        "dungeon": 3,
+        "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
+        "compatiable_versions": ["dev"],
+    },
+    "Murmuring Reef: Miniboss": {
+        "vanila_item": "Mermaid Suit",
+        "requirements": {
+            "all": [
+                has_small_keys(3, 1)
+            ]
+        },
+        "room": 0x0537,
+        "dungeon": 3,
+        "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
+        "compatiable_versions": ["dev"],
+    },
+    "Murmuring Reef: Surfaced Rupee Chest": {
+        "vanila_item": "Rupees (30)",
+        "requirements": {
+            "all": [
+                ("Mermaid Suit", 1)
+            ]
+        },
+        "room": 0x053d,
+        "dungeon": 3,
+        "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
+        "compatiable_versions": ["dev"],
+    },
+    "Murmuring Reef: Shells Puzzle": {
+        "vanila_item": "Boss Key (Murmuring Reef)",
+        "requirements": None,
+        "room": 0x0539,
+        "dungeon": 3,
+        "treasure_spawn_mode": TREASURE_SPAWN_CHEST,
+        "compatiable_versions": ["dev"],
+    },
+    "Murmuring Reef: Boss": {
+        "vanila_item": "Heart Container",
+        "requirements": {
+            "all": [
+                has_boss_key(3)
+            ]
+        },
+        "shortName": "d3Boss",
+        "dungeon": 3,
+        "treasure_spawn_mode": TREASURE_SPAWN_POOF,
+        "compatiable_versions": ["dev"],
+    },
 }
