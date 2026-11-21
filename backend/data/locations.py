@@ -87,7 +87,7 @@ locations_data = {
         "vanila_item": "Small Key (Dark Lighthouse)",
         "requirements": {
             "all": [
-                has_small_keys(1, 2l), 
+                has_small_keys(1, 2), 
                 require_generic_boss_and_miniboss_kill(True)
             ]
         },
